@@ -59,7 +59,7 @@ export function AvoneHome() {
   const [siteAssets, setSiteAssets] = useState<SiteMediaAssets>(defaultSiteAssets)
   const [activeSlide, setActiveSlide] = useState(0)
   const [addedSlug, setAddedSlug] = useState<string | null>(null)
-  const [liveProducts, setLiveProducts] = useState<Product[]>(products)
+  const [liveProducts, setLiveProducts] = useState<Product[]>([])
   const { addItem } = useCart()
 
   // Fetch live products from database on mount
@@ -167,19 +167,12 @@ export function AvoneHome() {
     }
   }
 
-  // FirstCry authentic clothing products for 4-column showcase (showing 4 items each)
-  const newArrivals = ((firstCryClothingSections['New Arrivals'] && firstCryClothingSections['New Arrivals'].length > 0)
-    ? firstCryClothingSections['New Arrivals']
-    : liveProducts).slice(0, 4)
-  const featuredItems = ((firstCryClothingSections['Featured Items'] && firstCryClothingSections['Featured Items'].length > 0)
-    ? firstCryClothingSections['Featured Items']
-    : liveProducts.slice(4)).slice(0, 4)
-  const bestSellers = ((firstCryClothingSections['Best Sellers'] && firstCryClothingSections['Best Sellers'].length > 0)
-    ? firstCryClothingSections['Best Sellers']
-    : liveProducts).slice(0, 4)
-  const onSale = ((firstCryClothingSections['On Sale'] && firstCryClothingSections['On Sale'].length > 0)
-    ? firstCryClothingSections['On Sale']
-    : liveProducts.slice(4)).slice(0, 4)
+  // Derive 4-column showcase products directly from database liveProducts
+  const newArrivals = liveProducts.slice(0, 4)
+  const featuredItems = liveProducts.slice(4, 8)
+  const bestSellers = liveProducts.slice(8, 12)
+  const onSale = liveProducts.slice(12, 16)
+  const isShowcaseLoading = liveProducts.length === 0
 
   const handleQuickAdd = (product: Product) => {
     const defaultSize = product.sizes?.[0] || 'Standard'
@@ -809,39 +802,51 @@ export function AvoneHome() {
               NEW ARRIVALS
             </h3>
             <div className="mt-4 space-y-4">
-              {newArrivals.map((product) => (
-                <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                      sizes="64px"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
-                    >
-                      {product.name}
-                    </Link>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
-                        ₹{product.price.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickAdd(product)}
-                        className="text-[11px] font-bold text-[#EB008B] hover:underline"
-                      >
-                        {addedSlug === product.slug ? 'Added' : '+ Add'}
-                      </button>
+              {isShowcaseLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3.5 animate-card-shimmer">
+                    <div className="size-16 shrink-0 rounded-xl bg-slate-200/80 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-3/4 rounded bg-slate-200/80 animate-pulse" />
+                      <div className="h-3 w-1/3 rounded bg-slate-200/80 animate-pulse" />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                newArrivals.map((product) => (
+                  <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+                        sizes="64px"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
+                      >
+                        {product.name}
+                      </Link>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
+                          ₹{product.price.toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickAdd(product)}
+                          className="text-[11px] font-bold text-[#EB008B] hover:underline"
+                        >
+                          {addedSlug === product.slug ? 'Added' : '+ Add'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -851,39 +856,51 @@ export function AvoneHome() {
               FEATURED ITEMS
             </h3>
             <div className="mt-4 space-y-4">
-              {featuredItems.map((product) => (
-                <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                      sizes="64px"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
-                    >
-                      {product.name}
-                    </Link>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
-                        ₹{product.price.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickAdd(product)}
-                        className="text-[11px] font-bold text-[#EB008B] hover:underline"
-                      >
-                        {addedSlug === product.slug ? 'Added' : '+ Add'}
-                      </button>
+              {isShowcaseLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3.5 animate-card-shimmer">
+                    <div className="size-16 shrink-0 rounded-xl bg-slate-200/80 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-3/4 rounded bg-slate-200/80 animate-pulse" />
+                      <div className="h-3 w-1/3 rounded bg-slate-200/80 animate-pulse" />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                featuredItems.map((product) => (
+                  <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+                        sizes="64px"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
+                      >
+                        {product.name}
+                      </Link>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
+                          ₹{product.price.toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickAdd(product)}
+                          className="text-[11px] font-bold text-[#EB008B] hover:underline"
+                        >
+                          {addedSlug === product.slug ? 'Added' : '+ Add'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -893,39 +910,51 @@ export function AvoneHome() {
               BEST SELLERS
             </h3>
             <div className="mt-4 space-y-4">
-              {bestSellers.map((product) => (
-                <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                      sizes="64px"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
-                    >
-                      {product.name}
-                    </Link>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
-                        ₹{product.price.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickAdd(product)}
-                        className="text-[11px] font-bold text-[#EB008B] hover:underline"
-                      >
-                        {addedSlug === product.slug ? 'Added' : '+ Add'}
-                      </button>
+              {isShowcaseLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3.5 animate-card-shimmer">
+                    <div className="size-16 shrink-0 rounded-xl bg-slate-200/80 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-3/4 rounded bg-slate-200/80 animate-pulse" />
+                      <div className="h-3 w-1/3 rounded bg-slate-200/80 animate-pulse" />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                bestSellers.map((product) => (
+                  <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+                        sizes="64px"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
+                      >
+                        {product.name}
+                      </Link>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
+                          ₹{product.price.toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickAdd(product)}
+                          className="text-[11px] font-bold text-[#EB008B] hover:underline"
+                        >
+                          {addedSlug === product.slug ? 'Added' : '+ Add'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -935,39 +964,51 @@ export function AvoneHome() {
               ON SALE
             </h3>
             <div className="mt-4 space-y-4">
-              {onSale.map((product) => (
-                <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                      sizes="64px"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/products/${product.slug}`}
-                      className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
-                    >
-                      {product.name}
-                    </Link>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
-                        ₹{product.price.toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickAdd(product)}
-                        className="text-[11px] font-bold text-[#EB008B] hover:underline"
-                      >
-                        {addedSlug === product.slug ? 'Added' : '+ Add'}
-                      </button>
+              {isShowcaseLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3.5 animate-card-shimmer">
+                    <div className="size-16 shrink-0 rounded-xl bg-slate-200/80 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-3/4 rounded bg-slate-200/80 animate-pulse" />
+                      <div className="h-3 w-1/3 rounded bg-slate-200/80 animate-pulse" />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                onSale.map((product) => (
+                  <div key={product.id} className="group flex items-center gap-3.5 transition-transform duration-200 hover:translate-x-1">
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-50 border border-neutral-100 shadow-2xs">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover object-center transition-transform duration-300 group-hover:scale-110"
+                        sizes="64px"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="block truncate text-xs sm:text-sm font-bold text-[#1A1A1A] transition-colors hover:text-[#EB008B]"
+                      >
+                        {product.name}
+                      </Link>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-bold text-[#3ea2a0]">
+                          ₹{product.price.toLocaleString()}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickAdd(product)}
+                          className="text-[11px] font-bold text-[#EB008B] hover:underline"
+                        >
+                          {addedSlug === product.slug ? 'Added' : '+ Add'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

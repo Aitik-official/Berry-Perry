@@ -8,20 +8,46 @@ import { verifyAdminAuth, unauthorizedResponse } from "@/lib/admin-auth";
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const fallbackProducts = kidsProductsList.length > 0 ? kidsProductsList : firstCryClothingProducts;
-
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
-    const products = await Product.find().sort({ createdAt: -1 }).lean();
-    return NextResponse.json({ success: true, products: products || [] });
-  } catch (error: any) {
-    console.warn("GET /api/products database error, using fallback products:", error.message);
-    return NextResponse.json({
-      success: true,
-      products: fallbackProducts,
-      isFallback: true,
+    const rawProducts = await Product.find().sort({ createdAt: -1 }).lean();
+
+    // Sort to prioritize baby clothing, toys, footwear, and general kids essentials first (non-diapers first)
+    const isDiaperProduct = (p: any) => {
+      const cat = (p.category || '').toLowerCase();
+      const subCat = (p.subCategory || '').toLowerCase();
+      const mainCat = (p.mainCategory || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      return (
+        cat.includes('diaper') ||
+        subCat.includes('diaper') ||
+        mainCat.includes('diaper') ||
+        name.includes('diaper') ||
+        name.includes('pants extra absorb') ||
+        name.includes('wonder pants')
+      );
+    };
+
+    const prioritizedProducts = [...(rawProducts || [])].sort((a: any, b: any) => {
+      const aIsDiaper = isDiaperProduct(a);
+      const bIsDiaper = isDiaperProduct(b);
+      if (aIsDiaper && !bIsDiaper) return 1;
+      if (!aIsDiaper && bIsDiaper) return -1;
+      return 0;
     });
+
+    return NextResponse.json({ success: true, products: prioritizedProducts });
+  } catch (error: any) {
+    console.error("GET /api/products database error:", error.message);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message || "Failed to load products from database",
+        products: [],
+      },
+      { status: 500 }
+    );
   }
 }
 

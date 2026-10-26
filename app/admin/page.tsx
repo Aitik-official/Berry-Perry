@@ -11,10 +11,10 @@ export const metadata = {
 
 export default function AdminPage() {
   return (
-    <div className="min-h-screen bg-[#f3f4f8] text-[#080d2d]">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#1A1A1A]">
       <Suspense
         fallback={
-          <div className="flex min-h-screen items-center justify-center font-bold text-[#080d2d]">
+          <div className="flex min-h-screen items-center justify-center font-bold text-[#1A1A1A]">
             Loading Admin Control Center...
           </div>
         }

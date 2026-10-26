@@ -115,7 +115,7 @@ export function InventoryTab({
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total SKUs</span>
             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
           </div>
-          <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#080d2d]">{metrics.total}</p>
+          <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#1A1A1A]">{metrics.total}</p>
           <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Products</span>
         </div>
 
@@ -142,7 +142,7 @@ export function InventoryTab({
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Avg Price</span>
             <IndianRupee className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
           </div>
-          <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#080d2d]">₹{metrics.avgPrice}</p>
+          <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#1A1A1A]">₹{metrics.avgPrice}</p>
           <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Active catalog</span>
         </div>
       </div>
@@ -157,7 +157,7 @@ export function InventoryTab({
               placeholder="Search by title, SKU ID, category, or sport..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-4 text-xs font-medium text-[#080d2d] outline-none transition focus:border-[#EB008B] focus:bg-white"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-4 text-xs font-medium text-[#1A1A1A] outline-none transition focus:border-[#EB008B] focus:bg-white"
             />
           </div>
 
@@ -165,7 +165,7 @@ export function InventoryTab({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
+              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#1A1A1A] outline-none focus:border-[#EB008B]"
             >
               {activeCategories.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -177,7 +177,7 @@ export function InventoryTab({
             <select
               value={selectedSport}
               onChange={(e) => setSelectedSport(e.target.value)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
+              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#1A1A1A] outline-none focus:border-[#EB008B]"
             >
               {activeSports.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -189,7 +189,7 @@ export function InventoryTab({
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value as any)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
+              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#1A1A1A] outline-none focus:border-[#EB008B]"
             >
               <option value="all">Stock: All</option>
               <option value="in_stock">In Stock Only</option>
@@ -211,7 +211,7 @@ export function InventoryTab({
       {/* Product List: Mobile Cards + Desktop Table */}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 px-4 sm:px-6 py-3.5 sm:py-4">
-          <h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#080d2d]">
+          <h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#1A1A1A]">
             Product Inventory
             <span className="ml-2 font-bold text-[#EB008B]">({filteredProducts.length})</span>
           </h2>
@@ -246,7 +246,7 @@ export function InventoryTab({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs text-[#080d2d] line-clamp-2">
+                    <div className="font-bold text-xs text-[#1A1A1A] line-clamp-2">
                       {product.name}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -270,7 +270,7 @@ export function InventoryTab({
 
                 <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
                   <div>
-                    <div className="font-black text-sm text-[#080d2d]">₹{product.price}</div>
+                    <div className="font-black text-sm text-[#1A1A1A]">₹{product.price}</div>
                     {product.originalPrice && product.originalPrice > product.price && (
                       <div className="text-[10px] text-slate-400 line-through">
                         ₹{product.originalPrice}
@@ -380,7 +380,7 @@ export function InventoryTab({
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-[#080d2d]">
+            <tbody className="divide-y divide-slate-100 text-[#1A1A1A]">
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center">
@@ -413,7 +413,7 @@ export function InventoryTab({
                           )}
                         </div>
                         <div>
-                          <div className="font-bold text-[#080d2d] line-clamp-1">
+                          <div className="font-bold text-[#1A1A1A] line-clamp-1">
                             {product.name}
                           </div>
                           <div className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -440,7 +440,7 @@ export function InventoryTab({
                     </td>
 
                     <td className="px-4 py-3">
-                      <div className="font-black text-[#080d2d]">₹{product.price}</div>
+                      <div className="font-black text-[#1A1A1A]">₹{product.price}</div>
                       {product.originalPrice && product.originalPrice > product.price && (
                         <div className="text-[10px] text-slate-400 line-through">
                           ₹{product.originalPrice}

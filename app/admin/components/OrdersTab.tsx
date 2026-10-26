@@ -192,7 +192,7 @@ export function OrdersTab() {
         <div className="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-sm">
           <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Orders</p>
           <div className="mt-1 sm:mt-2 flex items-baseline gap-1.5 sm:gap-2">
-            <span className="text-xl sm:text-2xl font-black text-[#080d2d]">{orders.length}</span>
+            <span className="text-xl sm:text-2xl font-black text-[#1A1A1A]">{orders.length}</span>
             <span className="text-[11px] font-semibold text-slate-400">received</span>
           </div>
         </div>
@@ -267,7 +267,7 @@ export function OrdersTab() {
           <div className="size-14 sm:size-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3 sm:mb-4">
             <ShoppingBag className="size-6 sm:size-8 text-slate-300" />
           </div>
-          <h3 className="text-sm sm:text-base font-black uppercase text-[#080d2d]">No Orders Found</h3>
+          <h3 className="text-sm sm:text-base font-black uppercase text-[#1A1A1A]">No Orders Found</h3>
           <p className="mt-1 text-xs text-slate-500 max-w-sm px-4">
             {searchTerm || statusFilter !== 'all'
               ? 'No orders match your filter criteria.'
@@ -309,7 +309,7 @@ export function OrdersTab() {
                         {/* 1. Order ID Column */}
                         <td className="py-3.5 px-4 align-top">
                           <div className="flex flex-col">
-                            <span className="font-mono font-black text-xs text-[#080d2d] group-hover:text-[#EB008B]">
+                            <span className="font-mono font-black text-xs text-[#1A1A1A] group-hover:text-[#EB008B]">
                               #{order.orderNumber}
                             </span>
                             <span className="text-[10px] text-slate-400 mt-0.5">
@@ -335,7 +335,7 @@ export function OrdersTab() {
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-bold text-[#080d2d] line-clamp-1 text-xs" title={firstItem?.name || 'Package item'}>
+                              <p className="font-bold text-[#1A1A1A] line-clamp-1 text-xs" title={firstItem?.name || 'Package item'}>
                                 {firstItem?.name || 'Order Item'}
                               </p>
                               <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
@@ -361,7 +361,7 @@ export function OrdersTab() {
                         {/* 3. Customer Contact Column */}
                         <td className="py-3.5 px-4 align-top">
                           <div className="flex flex-col">
-                            <span className="font-bold text-[#080d2d] text-xs">
+                            <span className="font-bold text-[#1A1A1A] text-xs">
                               {order.customer?.firstName} {order.customer?.lastName}
                             </span>
                             {order.customer?.phone && (
@@ -398,7 +398,7 @@ export function OrdersTab() {
                         {/* 5. Price Column */}
                         <td className="py-3.5 px-4 align-top text-right">
                           <div className="flex flex-col items-end">
-                            <span className="font-black text-sm text-[#080d2d]">
+                            <span className="font-black text-sm text-[#1A1A1A]">
                               ₹{order.grandTotal?.toLocaleString()}
                             </span>
                             <span className="text-[10px] font-bold uppercase mt-0.5">
@@ -439,7 +439,7 @@ export function OrdersTab() {
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 gap-2">
                     <div>
                       <span className="text-[10px] font-bold uppercase text-slate-400 block">Order ID</span>
-                      <span className="font-mono font-black text-sm text-[#080d2d]">
+                      <span className="font-mono font-black text-sm text-[#1A1A1A]">
                         #{order.orderNumber}
                       </span>
                     </div>
@@ -479,7 +479,7 @@ export function OrdersTab() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <span className="text-[10px] font-bold uppercase text-slate-400 block">Product</span>
-                      <p className="font-bold text-xs text-[#080d2d] line-clamp-1">
+                      <p className="font-bold text-xs text-[#1A1A1A] line-clamp-1">
                         {firstItem?.name || 'Order Item'}
                       </p>
                       <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-0.5">
@@ -499,7 +499,7 @@ export function OrdersTab() {
                   <div className="pt-2.5 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] font-bold uppercase text-slate-400 block">Contact</span>
-                      <p className="font-bold text-xs text-[#080d2d]">
+                      <p className="font-bold text-xs text-[#1A1A1A]">
                         {order.customer?.firstName} {order.customer?.lastName}
                       </p>
                       <p className="text-[10px] text-slate-500">{order.customer?.phone}</p>
@@ -507,7 +507,7 @@ export function OrdersTab() {
 
                     <div className="text-right">
                       <span className="text-[10px] font-bold uppercase text-slate-400 block">Total Price</span>
-                      <span className="font-black text-sm text-[#080d2d]">
+                      <span className="font-black text-sm text-[#1A1A1A]">
                         ₹{order.grandTotal?.toLocaleString()}
                       </span>
                       <span className="block text-[9px] font-bold uppercase text-slate-500">
@@ -536,12 +536,12 @@ export function OrdersTab() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-4 sm:py-5 bg-slate-50 shrink-0">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
-                <div className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-[#080d2d] text-white">
+                <div className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20">
                   <ShoppingBag className="size-4 sm:size-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-black text-sm sm:text-base text-[#080d2d] truncate">Order #{selectedOrder.orderNumber}</h3>
+                    <h3 className="font-black text-sm sm:text-base text-[#1A1A1A] truncate">Order #{selectedOrder.orderNumber}</h3>
                     <span
                       className={`rounded-full border px-2 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider shrink-0 ${getStatusBadge(
                         selectedOrder.orderStatus
@@ -608,7 +608,7 @@ export function OrdersTab() {
                 <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 sm:p-4 space-y-2.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400 font-bold uppercase text-[10px]">Customer Name</span>
-                    <span className="font-black text-[#080d2d] text-xs sm:text-sm">
+                    <span className="font-black text-[#1A1A1A] text-xs sm:text-sm">
                       {selectedOrder.customer?.firstName} {selectedOrder.customer?.lastName}
                     </span>
                   </div>
@@ -682,7 +682,7 @@ export function OrdersTab() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="font-bold text-[#080d2d] truncate">{item.name}</p>
+                          <p className="font-bold text-[#1A1A1A] truncate">{item.name}</p>
                           <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">
                             {item.size ? `Size: ${item.size}` : ''}
                             {item.color ? ` • ${item.color}` : ''}
@@ -693,7 +693,7 @@ export function OrdersTab() {
                         <p className="text-[11px] font-bold text-slate-500">
                           {item.quantity} × ₹{item.price?.toLocaleString()}
                         </p>
-                        <p className="font-black text-[#080d2d] text-xs sm:text-sm">
+                        <p className="font-black text-[#1A1A1A] text-xs sm:text-sm">
                           ₹{((item.quantity || 1) * (item.price || 0)).toLocaleString()}
                         </p>
                       </div>
@@ -745,8 +745,8 @@ export function OrdersTab() {
                   ) : null}
 
                   <div className="flex justify-between items-center pt-3 border-t border-slate-200 text-sm">
-                    <span className="font-black uppercase text-[#080d2d]">Total Amount</span>
-                    <span className="text-base sm:text-lg font-black text-[#080d2d]">
+                    <span className="font-black uppercase text-[#1A1A1A]">Total Amount</span>
+                    <span className="text-base sm:text-lg font-black text-[#1A1A1A]">
                       ₹{selectedOrder.grandTotal?.toLocaleString()}
                     </span>
                   </div>
@@ -759,7 +759,7 @@ export function OrdersTab() {
               <span className="text-[11px] sm:text-xs text-slate-400 font-medium truncate">Order #{selectedOrder.orderNumber}</span>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="rounded-xl bg-[#080d2d] px-4 sm:px-5 py-2 text-xs font-bold text-white transition hover:bg-[#EB008B] shadow-sm shrink-0"
+                className="rounded-xl bg-[#1A1A1A] px-4 sm:px-5 py-2 text-xs font-bold text-white transition hover:bg-[#EB008B] shadow-sm shrink-0"
               >
                 Close Drawer
               </button>

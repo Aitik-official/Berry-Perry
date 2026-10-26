@@ -273,8 +273,29 @@ export function ProductsClient() {
       .sort((a, b) => {
         if (sortBy === 'price-low') return a.price - b.price
         if (sortBy === 'price-high') return b.price - a.price
-        if (sortBy === 'rating') return b.rating - a.rating
-        return 0 // featured default
+        if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0)
+
+        // Featured default: prioritize baby clothing, footwear, toys, and nursery over diapers
+        const isDiaper = (p: Product) => {
+          const cat = (p.category || '').toLowerCase()
+          const subCat = (p.subCategory || '').toLowerCase()
+          const mainCat = (p.mainCategory || '').toLowerCase()
+          const name = (p.name || '').toLowerCase()
+          return (
+            cat.includes('diaper') ||
+            subCat.includes('diaper') ||
+            mainCat.includes('diaper') ||
+            name.includes('diaper') ||
+            name.includes('pants extra absorb') ||
+            name.includes('wonder pants')
+          )
+        }
+
+        const aIsDiaper = isDiaper(a)
+        const bIsDiaper = isDiaper(b)
+        if (aIsDiaper && !bIsDiaper) return 1
+        if (!aIsDiaper && bIsDiaper) return -1
+        return 0
       })
   }, [productsList, selectedGender, selectedCategory, selectedSport, selectedBadge, selectedOutlet, selectedStock, selectedPriceMax, selectedMinRating, search, sortBy])
 
@@ -702,7 +723,7 @@ export function ProductsClient() {
               <div className="pt-4 border-t">
                 <button
                   onClick={() => setFilterDrawerOpen(false)}
-                  className="w-full rounded-lg bg-[#1A1A1A] py-3 text-xs font-black uppercase tracking-wider text-white"
+                  className="w-full rounded-xl bg-[#EB008B] py-3 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#EB008B]/20 transition hover:bg-[#d4007d]"
                 >
                   Show Results ({filteredProducts.length})
                 </button>
@@ -725,7 +746,7 @@ export function ProductsClient() {
               <p className="mt-1 text-xs text-slate-500">Try adjusting your filters or search keywords.</p>
               <button
                 onClick={resetFilters}
-                className="mt-5 rounded-lg bg-[#1A1A1A] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#EB008B]"
+                className="mt-5 rounded-xl bg-[#EB008B] px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-[#EB008B]/20 transition hover:bg-[#d4007d]"
               >
                 Reset All Filters
               </button>
@@ -745,31 +766,30 @@ export function ProductsClient() {
 
 function ProductCardSkeleton() {
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm p-3.5 animate-pulse">
-      {/* Blank image stage with shimmer animation */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-100 flex items-center justify-center">
-        <div className="size-10 rounded-full bg-slate-200/80 flex items-center justify-center">
-          <ShoppingBag className="size-5 text-slate-300" />
+    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs p-3.5 animate-card-shimmer">
+      {/* Blank image stage with soft gradient pulse */}
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 flex items-center justify-center">
+        <div className="size-11 rounded-full bg-white/80 shadow-xs flex items-center justify-center animate-pulse">
+          <ShoppingBag className="size-5 text-[#EB008B]/40" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
       </div>
 
-      {/* Info placeholder */}
+      {/* Info placeholder lines */}
       <div className="flex flex-1 flex-col pt-3.5 pb-1">
         <div className="flex items-center justify-between">
-          <div className="h-3 w-16 rounded bg-slate-200" />
-          <div className="h-3 w-12 rounded bg-slate-200" />
+          <div className="h-3 w-16 rounded-full bg-slate-200 animate-pulse" />
+          <div className="h-3 w-12 rounded-full bg-slate-200 animate-pulse" />
         </div>
-        <div className="mt-2.5 h-4 w-4/5 rounded bg-slate-200" />
-        <div className="mt-2 h-3 w-full rounded bg-slate-100" />
-        <div className="mt-1.5 h-3 w-2/3 rounded bg-slate-100" />
+        <div className="mt-3 h-4 w-4/5 rounded-md bg-slate-200 animate-pulse" />
+        <div className="mt-2 h-3 w-full rounded-md bg-slate-100 animate-pulse" />
+        <div className="mt-1.5 h-3 w-2/3 rounded-md bg-slate-100 animate-pulse" />
 
         <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-          <div className="h-5 w-20 rounded bg-slate-200" />
+          <div className="h-5 w-20 rounded-md bg-slate-200 animate-pulse" />
           <div className="flex items-center gap-1.5">
-            <div className="size-3 rounded-full bg-slate-200" />
-            <div className="size-3 rounded-full bg-slate-200" />
-            <div className="size-3 rounded-full bg-slate-200" />
+            <div className="size-3 rounded-full bg-slate-200 animate-pulse" />
+            <div className="size-3 rounded-full bg-slate-200 animate-pulse" />
+            <div className="size-3 rounded-full bg-slate-200 animate-pulse" />
           </div>
         </div>
       </div>
@@ -815,7 +835,7 @@ function ProductCard({ product }: { product: Product }) {
         ) : null}
 
         {/* Quick View Tag on hover */}
-        <div className="absolute inset-x-3 bottom-3 flex items-center justify-center rounded-lg bg-[#1A1A1A]/90 py-2 text-xs font-black uppercase tracking-wider text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-x-3 bottom-3 flex items-center justify-center rounded-lg bg-[#EB008B]/95 py-2 text-xs font-black uppercase tracking-wider text-white opacity-0 backdrop-blur-sm shadow-md transition-opacity duration-300 group-hover:opacity-100">
           {product.inStock ? 'View Product Details' : 'View (Out of Stock)'}
         </div>
       </div>

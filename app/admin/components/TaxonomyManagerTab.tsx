@@ -55,7 +55,7 @@ export function TaxonomyManagerTab({
           <span className="text-[10px] font-black uppercase tracking-widest text-[#EB008B]">
             Global Architecture
           </span>
-          <h2 className="text-base sm:text-xl font-black uppercase tracking-tight text-[#080d2d]">
+          <h2 className="text-base sm:text-xl font-black uppercase tracking-tight text-[#1A1A1A]">
             Store Taxonomy &amp; Dynamic Elements Manager
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -80,11 +80,11 @@ export function TaxonomyManagerTab({
           onClick={() => setActiveSubTab('categories')}
           className={`flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeSubTab === 'categories'
-              ? 'bg-[#080d2d] text-white shadow-md'
+              ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Layers className="h-4 w-4 text-[#EB008B]" />
+          <Layers className={`h-4 w-4 ${activeSubTab === 'categories' ? 'text-white' : 'text-[#EB008B]'}`} />
           <span>Categories ({activeMainCategories.length} Main • {taxonomyConfig.categories.length} Sub)</span>
         </button>
 
@@ -93,11 +93,11 @@ export function TaxonomyManagerTab({
           onClick={() => setActiveSubTab('badges')}
           className={`flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeSubTab === 'badges'
-              ? 'bg-[#080d2d] text-white shadow-md'
+              ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Tag className="h-4 w-4 text-[#EB008B]" />
+          <Tag className={`h-4 w-4 ${activeSubTab === 'badges' ? 'text-white' : 'text-[#EB008B]'}`} />
           <span>Badges &amp; Tags ({taxonomyConfig.badges.length})</span>
         </button>
 
@@ -106,11 +106,11 @@ export function TaxonomyManagerTab({
           onClick={() => setActiveSubTab('sizes')}
           className={`flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeSubTab === 'sizes'
-              ? 'bg-[#080d2d] text-white shadow-md'
+              ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Maximize2 className="h-4 w-4 text-[#EB008B]" />
+          <Maximize2 className={`h-4 w-4 ${activeSubTab === 'sizes' ? 'text-white' : 'text-[#EB008B]'}`} />
           <span>Sizes ({taxonomyConfig.sizes.length})</span>
         </button>
 
@@ -119,11 +119,11 @@ export function TaxonomyManagerTab({
           onClick={() => setActiveSubTab('announcement')}
           className={`flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeSubTab === 'announcement'
-              ? 'bg-[#080d2d] text-white shadow-md'
+              ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Megaphone className="h-4 w-4 text-[#EB008B]" />
+          <Megaphone className={`h-4 w-4 ${activeSubTab === 'announcement' ? 'text-white' : 'text-[#EB008B]'}`} />
           <span>Announcement Bar</span>
         </button>
 
@@ -132,11 +132,11 @@ export function TaxonomyManagerTab({
           onClick={() => setActiveSubTab('contact')}
           className={`flex items-center gap-2 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider transition shrink-0 ${
             activeSubTab === 'contact'
-              ? 'bg-[#080d2d] text-white shadow-md'
+              ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
               : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
           }`}
         >
-          <Phone className="h-4 w-4 text-[#EB008B]" />
+          <Phone className={`h-4 w-4 ${activeSubTab === 'contact' ? 'text-white' : 'text-[#EB008B]'}`} />
           <span>Contact &amp; Socials</span>
         </button>
       </div>

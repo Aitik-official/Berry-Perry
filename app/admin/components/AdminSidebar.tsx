@@ -43,25 +43,25 @@ export function AdminSidebar({
 
       {/* LEFT SIDEBAR NAVIGATION */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-800 bg-[#1A1A1A] text-white shadow-xl transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-neutral-200 bg-white text-[#1A1A1A] shadow-xl transition-transform duration-300 lg:translate-x-0 ${
           mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-5">
+        <div className="flex h-16 items-center justify-between border-b border-neutral-200 px-5 bg-[#FAF8F5]/60">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-black italic tracking-tighter text-white">BERRY PERRY</span>
+            <span className="text-xl font-black italic tracking-tighter text-[#1A1A1A]">BERRY PERRY</span>
             <span className="rounded bg-[#EB008B] px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
               ADMIN
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-400">
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
               v2.3
             </span>
             <button
               type="button"
               onClick={() => setMobileSidebarOpen(false)}
-              className="rounded p-1 text-slate-400 hover:text-white lg:hidden"
+              className="rounded p-1 text-slate-400 hover:text-slate-700 lg:hidden"
               aria-label="Close sidebar"
             >
               <X className="h-5 w-5" />
@@ -83,8 +83,8 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'orders'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export function AdminSidebar({
             </div>
             <span
               className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                activeTab === 'orders' ? 'bg-white text-[#EB008B]' : 'bg-emerald-500/20 text-emerald-400'
+                activeTab === 'orders' ? 'bg-white text-[#EB008B]' : 'bg-emerald-100 text-emerald-700'
               }`}
             >
               Live
@@ -109,8 +109,8 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'inventory'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -119,7 +119,7 @@ export function AdminSidebar({
             </div>
             <span
               className={`rounded-full px-1.5 py-0.2 text-[10px] font-black ${
-                activeTab === 'inventory' ? 'bg-white text-[#EB008B]' : 'bg-slate-800 text-slate-300'
+                activeTab === 'inventory' ? 'bg-white text-[#EB008B]' : 'bg-slate-100 text-slate-600'
               }`}
             >
               {productsCount}
@@ -135,19 +135,19 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'inventory-management'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Truck className="h-4 w-4 text-emerald-400" />
+              <Truck className="h-4 w-4 text-[#5CB946]" />
               <span>Inventory Management</span>
             </div>
             <span
               className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                 activeTab === 'inventory-management'
                   ? 'bg-white text-[#EB008B]'
-                  : 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-emerald-100 text-emerald-700'
               }`}
             >
               Operations
@@ -163,8 +163,8 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'media'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export function AdminSidebar({
             </div>
             <span
               className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
-                activeTab === 'media' ? 'bg-black/30 text-white' : 'bg-[#EB008B]/20 text-[#EB008B]'
+                activeTab === 'media' ? 'bg-white text-[#EB008B]' : 'bg-[#EB008B]/10 text-[#EB008B]'
               }`}
             >
               Visual
@@ -189,8 +189,8 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'taxonomy'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export function AdminSidebar({
             </div>
             <span
               className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
-                activeTab === 'taxonomy' ? 'bg-black/30 text-white' : 'bg-emerald-500/20 text-emerald-400'
+                activeTab === 'taxonomy' ? 'bg-white text-[#EB008B]' : 'bg-emerald-100 text-emerald-700'
               }`}
             >
               Dynamic
@@ -215,8 +215,8 @@ export function AdminSidebar({
             }}
             className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold transition ${
               activeTab === 'settings'
-                ? 'bg-[#EB008B] text-white shadow-lg'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-[#EB008B] text-white shadow-md shadow-[#EB008B]/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -225,7 +225,7 @@ export function AdminSidebar({
             </div>
           </button>
 
-          <div className="my-4 border-t border-slate-800/80" />
+          <div className="my-4 border-t border-slate-200" />
 
           {/* Quick storefront links */}
           <div className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -235,39 +235,39 @@ export function AdminSidebar({
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <div className="flex items-center gap-3">
-              <Eye className="h-4 w-4 text-emerald-400" />
+              <Eye className="h-4 w-4 text-[#5CB946]" />
               <span>Preview Homepage</span>
             </div>
-            <ExternalLink className="h-3 w-3 text-slate-500" />
+            <ExternalLink className="h-3 w-3 text-slate-400" />
           </Link>
 
           <Link
             href="/products"
             target="_blank"
-            className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <div className="flex items-center gap-3">
-              <Package className="h-4 w-4 text-blue-400" />
+              <Package className="h-4 w-4 text-[#00A8E8]" />
               <span>View Catalog</span>
             </div>
-            <ExternalLink className="h-3 w-3 text-slate-500" />
+            <ExternalLink className="h-3 w-3 text-slate-400" />
           </Link>
         </div>
 
-        <div className="border-t border-slate-800 p-3 space-y-2">
+        <div className="border-t border-slate-200 p-3 space-y-2 bg-[#FAF8F5]/50">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-medium text-slate-400">Admin Active</span>
+              <span className="h-2 w-2 rounded-full bg-[#5CB946] animate-pulse" />
+              <span className="text-[11px] font-medium text-slate-500">Admin Active</span>
             </div>
           </div>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-400 transition hover:bg-red-500 hover:text-white"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-500 hover:text-white"
           >
             <LogOut className="size-3.5" />
             <span>Sign Out</span>

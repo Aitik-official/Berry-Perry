@@ -76,14 +76,73 @@ export const TAXONOMY_STORAGE_KEY = 'berryperry_taxonomy_config_v1'
 
 import { firstCryCategoryHierarchy } from './firstcry-categories'
 
-export const defaultMainCategories: MainCategoryItem[] = firstCryCategoryHierarchy.map((cat, idx) => ({
-  id: `main-${cat.slug}`,
-  label: cat.name,
-  value: cat.slug,
-  showOnNavbar: idx < 10,
-  description: `${cat.name} collections`,
-  order: idx + 1,
-}))
+export const defaultMainCategories: MainCategoryItem[] = [
+  {
+    id: 'main-bath-skin-care-products',
+    label: 'Bath & Skin Care Products',
+    value: 'bath-skin-care-products',
+    navAlias: 'BATH & CARE',
+    showOnNavbar: true,
+    description: 'Bath & Skin Care Products collections',
+    order: 1,
+  },
+  {
+    id: 'main-toys-gaming',
+    label: 'Toys & Gaming',
+    value: 'toys-gaming',
+    navAlias: 'TOYS & GAMES',
+    showOnNavbar: true,
+    description: 'Toys & Gaming collections',
+    order: 2,
+  },
+  {
+    id: 'main-baby-kids-clothing',
+    label: 'Baby & Kids Clothing',
+    value: 'baby-kids-clothing',
+    navAlias: 'CLOTHING',
+    showOnNavbar: true,
+    description: 'Baby & Kids Clothing collections',
+    order: 3,
+  },
+  {
+    id: 'main-baby-kids-footwear',
+    label: 'Baby & Kids Footwear',
+    value: 'baby-kids-footwear',
+    navAlias: 'FOOTWEAR',
+    showOnNavbar: true,
+    description: 'Baby & Kids Footwear collections',
+    order: 4,
+  },
+  {
+    id: 'main-baby-gear',
+    label: 'Baby Gear',
+    value: 'baby-gear',
+    navAlias: '',
+    showOnNavbar: true,
+    description: 'Baby Gear collections',
+    order: 5,
+  },
+  ...firstCryCategoryHierarchy
+    .filter(
+      (cat) =>
+        ![
+          'bath-skin-care-products',
+          'toys-gaming',
+          'baby-kids-clothing',
+          'baby-kids-footwear',
+          'baby-gear',
+        ].includes(cat.slug)
+    )
+    .map((cat, idx) => ({
+      id: `main-${cat.slug}`,
+      label: cat.name,
+      value: cat.slug,
+      navAlias: '',
+      showOnNavbar: false,
+      description: `${cat.name} collections`,
+      order: idx + 6,
+    })),
+]
 
 export const defaultCategories: CategoryItem[] = firstCryCategoryHierarchy.flatMap((cat) =>
   cat.children.map((sub, sIdx) => ({

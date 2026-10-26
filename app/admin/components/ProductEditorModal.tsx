@@ -210,7 +210,7 @@ export function ProductEditorModal({
             <span className="text-[10px] font-black uppercase tracking-widest text-[#EB008B] block">
               {editingProduct ? 'Update Inventory Item' : 'New Catalog Item'}
             </span>
-            <h3 className="text-base sm:text-xl font-black uppercase tracking-tight text-[#080d2d] truncate">
+            <h3 className="text-base sm:text-xl font-black uppercase tracking-tight text-[#1A1A1A] truncate">
               {editingProduct ? 'Edit Product Details' : 'Add Catalog Product'}
             </h3>
             <p className="hidden sm:block text-xs text-slate-400">
@@ -321,7 +321,7 @@ export function ProductEditorModal({
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-[#EB008B] px-6 sm:px-7 py-2.5 font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-red-700 text-center"
+              className="rounded-xl bg-[#EB008B] px-6 sm:px-7 py-2.5 font-black uppercase tracking-wider text-white shadow-md shadow-[#EB008B]/25 transition hover:bg-[#d4007d] text-center"
             >
               {editingProduct ? 'Save Product Changes' : 'Create & Publish Product'}
             </button>

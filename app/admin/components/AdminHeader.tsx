@@ -26,7 +26,7 @@ export function AdminHeader({
           <Menu className="h-5 w-5" />
         </button>
         <div className="min-w-0">
-          <h1 className="text-xs sm:text-base font-black uppercase tracking-tight text-[#080d2d] truncate">
+          <h1 className="text-xs sm:text-base font-black uppercase tracking-tight text-[#1A1A1A] truncate">
             {activeTab === 'orders' && 'Customer Orders'}
             {activeTab === 'inventory' && 'Inventory & Products'}
             {activeTab === 'inventory-management' && 'Inventory Management'}
@@ -59,7 +59,7 @@ export function AdminHeader({
           <button
             type="button"
             onClick={onOpenAddProduct}
-            className="flex items-center gap-1 sm:gap-1.5 rounded-lg bg-[#EB008B] px-2.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-red-700 shrink-0"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-[#EB008B] px-3 sm:px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#EB008B]/25 transition hover:bg-[#d4007d] shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span className="hidden xs:inline">Add Product</span>

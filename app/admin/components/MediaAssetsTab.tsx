@@ -51,7 +51,7 @@ export function MediaAssetsTab({
           <span className="text-[10px] font-black uppercase tracking-widest text-[#EB008B]">
             Unified Homepage Visual CMS
           </span>
-          <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#080d2d]">
+          <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#1A1A1A]">
             Homepage Section-by-Section Media Manager
           </h2>
           <p className="text-xs text-slate-500">
@@ -61,9 +61,9 @@ export function MediaAssetsTab({
         <Link
           href="/"
           target="_blank"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#080d2d] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-slate-800 transition shrink-0"
+          className="flex items-center justify-center gap-2 rounded-xl bg-[#1A1A1A] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#EB008B] transition shrink-0"
         >
-          <Eye className="h-4 w-4 text-emerald-400" />
+          <Eye className="h-4 w-4 text-[#5CB946]" />
           <span>Preview Live Changes</span>
         </Link>
       </div>
@@ -131,7 +131,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#EB008B]">
                   Section 01 • Top of Homepage
                 </span>
-                <h3 className="text-sm sm:text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-sm sm:text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   Hero Banner Slides ({resolvedSlides.length} Slides)
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -141,9 +141,9 @@ export function MediaAssetsTab({
               <button
                 type="button"
                 onClick={addSlide}
-                className="flex items-center justify-center gap-1.5 rounded-lg bg-[#080d2d] px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-800 transition shrink-0 self-start sm:self-auto shadow-sm"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-[#EB008B] px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-[#d4007d] transition shrink-0 self-start sm:self-auto shadow-md shadow-[#EB008B]/20"
               >
-                <Plus className="h-4 w-4 text-[#EB008B]" />
+                <Plus className="h-4 w-4 text-white" />
                 <span>Add Hero Slide</span>
               </button>
             </div>
@@ -160,7 +160,7 @@ export function MediaAssetsTab({
                       <span className="flex size-6 items-center justify-center rounded-full bg-[#EB008B] text-[11px] font-black text-white">
                         {index + 1}
                       </span>
-                      <span className="text-xs font-black uppercase tracking-wider text-[#080d2d]">
+                      <span className="text-xs font-black uppercase tracking-wider text-[#1A1A1A]">
                         Slide #{index + 1}: &ldquo;{slide.taglineTop || 'Banner'}&rdquo;
                       </span>
                     </div>
@@ -200,7 +200,7 @@ export function MediaAssetsTab({
                             type="text"
                             value={slide.taglineTop || ''}
                             onChange={(e) => updateSlide(index, { taglineTop: e.target.value })}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#080d2d] focus:border-[#EB008B] focus:outline-none"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#1A1A1A] focus:border-[#EB008B] focus:outline-none"
                             placeholder="e.g. SPRING COLLECTION"
                           />
                           <div className="flex items-center gap-2 pt-1">
@@ -226,7 +226,7 @@ export function MediaAssetsTab({
                             type="text"
                             value={slide.taglineBottom || ''}
                             onChange={(e) => updateSlide(index, { taglineBottom: e.target.value })}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#080d2d] focus:border-[#EB008B] focus:outline-none"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#1A1A1A] focus:border-[#EB008B] focus:outline-none"
                             placeholder="e.g. FOR MODERN KIDS"
                           />
                           <div className="flex items-center gap-2 pt-1">
@@ -255,7 +255,7 @@ export function MediaAssetsTab({
                               type="text"
                               value={slide.buttonText || ''}
                               onChange={(e) => updateSlide(index, { buttonText: e.target.value })}
-                              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#080d2d] focus:border-[#EB008B] focus:outline-none"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#1A1A1A] focus:border-[#EB008B] focus:outline-none"
                               placeholder="e.g. SHOP COLLECTION"
                             />
                           </div>
@@ -317,7 +317,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#4361ee]">
                   Section 02 • Kids&apos; Collections Masonry
                 </span>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   Shop by Category (Clothing, Accessories, Books, Playthings)
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -599,7 +599,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#EB008B]">
                   Section 03 • Promotional Split
                 </span>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   For Boys &amp; For Girls Banners
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -719,7 +719,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#5CB946]">
                   Section 04 • Toys &amp; Gear Showcase
                 </span>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   From Classic to Modern Toys &amp; Category Cards
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -792,7 +792,7 @@ export function MediaAssetsTab({
 
             {/* Bottom 3 Category Cards */}
             <div className="pt-4 border-t border-slate-100">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#080d2d] mb-4">
+              <h4 className="text-xs font-black uppercase tracking-wider text-[#1A1A1A] mb-4">
                 Category Cards (3 Pillars)
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -868,7 +868,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#3b82f6]">
                   Section 05 • Age Group Filtering
                 </span>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   Shop by Age (Gift Finder Cards)
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -923,7 +923,7 @@ export function MediaAssetsTab({
 
             {/* Cards Grid */}
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#080d2d] mb-3">
+              <h4 className="text-xs font-black uppercase tracking-wider text-[#1A1A1A] mb-3">
                 Age Group Cards ({sba.cards?.length || 5} Cards)
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -1019,7 +1019,7 @@ export function MediaAssetsTab({
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#3b82f6]">
                   Section 06 • Price Bracket Filtering
                 </span>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                <h3 className="text-base font-black uppercase tracking-tight text-[#1A1A1A]">
                   Shop by Price (Price Slider Cards)
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -1063,7 +1063,7 @@ export function MediaAssetsTab({
 
             {/* Price Cards Grid */}
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#080d2d] mb-3">
+              <h4 className="text-xs font-black uppercase tracking-wider text-[#1A1A1A] mb-3">
                 Price Cards ({(sbp.cards || []).length} Cards)
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -1108,17 +1108,17 @@ export function MediaAssetsTab({
       />
 
       {/* Bottom Sticky Action Bar */}
-      <div className="sticky bottom-4 sm:bottom-6 z-30 flex flex-col xs:flex-row items-center justify-between rounded-xl sm:rounded-2xl border border-slate-800 bg-[#080d2d] p-3.5 sm:p-4 text-white shadow-2xl gap-3">
+      <div className="sticky bottom-4 sm:bottom-6 z-30 flex flex-col xs:flex-row items-center justify-between rounded-xl sm:rounded-2xl border border-neutral-200 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 text-[#1A1A1A] shadow-xl gap-3">
         <div className="text-center xs:text-left">
           <span className="font-bold text-xs sm:text-sm block">All Homepage Sections Active</span>
-          <p className="text-[11px] sm:text-xs text-slate-400">
+          <p className="text-[11px] sm:text-xs text-slate-500">
             Changes take effect instantly on the live website.
           </p>
         </div>
         <Link
           href="/"
           target="_blank"
-          className="w-full xs:w-auto flex items-center justify-center gap-2 rounded-lg bg-[#EB008B] px-5 sm:px-6 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-red-700 shrink-0"
+          className="w-full xs:w-auto flex items-center justify-center gap-2 rounded-xl bg-[#EB008B] px-5 sm:px-6 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#EB008B]/25 transition hover:bg-[#d4007d] shrink-0"
         >
           <Eye className="h-4 w-4" />
           <span>Preview Storefront</span>

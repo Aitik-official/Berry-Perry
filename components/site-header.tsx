@@ -121,6 +121,9 @@ export function SiteHeader() {
           }
           setTaxonomyConfig(merged)
           if (merged.announcement) setAnnouncement(merged.announcement)
+          try {
+            localStorage.setItem('berryperry_taxonomy_config_v1', JSON.stringify(merged))
+          } catch {}
         }
       })
       .catch(() => {})
@@ -719,10 +722,10 @@ export function SiteHeader() {
                 <Link
                   href="/cart"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-lg bg-[#1A1A1A] px-4 py-3 text-sm font-bold uppercase text-white shadow-md hover:bg-[#EB008B] transition"
+                  className="flex items-center justify-between rounded-xl bg-gradient-to-r from-[#EB008B] to-[#d4007d] px-4 py-3 text-sm font-bold uppercase text-white shadow-md shadow-[#EB008B]/20 hover:brightness-105 transition"
                 >
                   <span>View Bag</span>
-                  <span className="rounded-full bg-[#EB008B] px-2 py-0.5 text-xs font-black">
+                  <span className="rounded-full bg-[#FFF000] px-2.5 py-0.5 text-xs font-black text-[#1A1A1A]">
                     {totalCount} items
                   </span>
                 </Link>

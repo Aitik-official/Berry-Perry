@@ -14,7 +14,7 @@ export function SettingsTab({
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-black uppercase tracking-wider text-[#080d2d]">
+        <h3 className="text-sm font-black uppercase tracking-wider text-[#1A1A1A]">
           MongoDB Atlas & System Settings
         </h3>
         <p className="mt-1 text-xs text-slate-500">

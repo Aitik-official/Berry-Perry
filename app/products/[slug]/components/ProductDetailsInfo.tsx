@@ -199,7 +199,7 @@ export function ProductDetailsInfo({
             >
               <Minus className="size-3.5" />
             </button>
-            <span className="min-w-10 text-center text-sm font-black text-[#080d2d]">{quantity}</span>
+            <span className="min-w-10 text-center text-sm font-black text-[#1A1A1A]">{quantity}</span>
             <button
               type="button"
               onClick={() => setQuantity(quantity + 1)}
@@ -214,7 +214,7 @@ export function ProductDetailsInfo({
             type="button"
             onClick={onAddToCart}
             disabled={!product.inStock}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[#080d2d] bg-white px-6 py-3.5 text-xs font-black uppercase tracking-[0.14em] text-[#080d2d] transition-all hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[#EB008B] bg-white px-6 py-3.5 text-xs font-black uppercase tracking-[0.14em] text-[#EB008B] transition-all hover:bg-[#EB008B]/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="size-4" />
             <span>{product.inStock ? 'Add to Bag' : 'Out of Stock'}</span>
@@ -275,7 +275,7 @@ export function ProductDetailsInfo({
                 />
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#1A1A1A] px-4 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#EB008B] shrink-0"
+                  className="rounded-xl bg-[#5CB946] px-4 py-2 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#4ea03b] shrink-0"
                 >
                   Notify Me
                 </button>

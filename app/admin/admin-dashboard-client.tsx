@@ -138,10 +138,10 @@ export function AdminDashboardClient({ initialTab }: { initialTab?: AdminTab }) 
   // While checking auth status
   if (isAuthenticated === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#080d2d]">
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5]">
         <div className="flex flex-col items-center gap-3">
-          <div className="size-8 animate-spin rounded-full border-4 border-slate-700 border-t-[#EB008B]" />
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+          <div className="size-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#EB008B]" />
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
             Verifying Admin Access...
           </span>
         </div>
@@ -155,7 +155,7 @@ export function AdminDashboardClient({ initialTab }: { initialTab?: AdminTab }) 
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f4f5f8] text-[#080d2d]">
+    <div className="flex min-h-screen bg-[#FAF8F5] text-[#1A1A1A]">
       {/* SIDEBAR NAVIGATION */}
       <AdminSidebar
         activeTab={activeTab}
@@ -177,9 +177,19 @@ export function AdminDashboardClient({ initialTab }: { initialTab?: AdminTab }) 
 
         <main className="p-4 sm:p-6 lg:p-8">
           {toastMessage && (
-            <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-emerald-500 bg-[#080d2d] px-4 py-3 text-sm font-semibold text-white shadow-2xl animate-in slide-in-from-bottom">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <span>{toastMessage}</span>
+            <div className="fixed top-6 right-6 z-[9999] flex items-center gap-3 rounded-2xl border-2 border-[#5CB946] bg-white/95 backdrop-blur-md px-5 py-3.5 text-sm font-bold text-[#1A1A1A] shadow-[0_12px_40px_rgba(0,0,0,0.12)] animate-in fade-in slide-in-from-top-4 duration-300 max-w-md">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#5CB946]/15 text-[#5CB946]">
+                <CheckCircle2 className="size-5 text-[#5CB946]" />
+              </div>
+              <span className="flex-1 leading-snug">{toastMessage}</span>
+              <button
+                type="button"
+                onClick={() => setToastMessage(null)}
+                className="text-slate-400 hover:text-slate-700 transition-colors ml-2"
+                aria-label="Dismiss toast"
+              >
+                ✕
+              </button>
             </div>
           )}
 

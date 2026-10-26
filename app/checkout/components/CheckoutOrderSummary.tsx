@@ -85,7 +85,7 @@ export function CheckoutOrderSummary({
             {!promoApplied && (
               <button
                 type="submit"
-                className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#EB008B]"
+                className="rounded-lg bg-[#5CB946] px-3 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#4ea03b]"
               >
                 Apply
               </button>

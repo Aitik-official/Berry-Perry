@@ -69,7 +69,7 @@ export function CheckoutConfirmedStep({
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A1A] px-8 py-3.5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-[#EB008B]"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#EB008B] px-8 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[#EB008B]/20 transition hover:bg-[#d4007d]"
         >
           <span>Continue Shopping</span>
           <ArrowRight className="size-4" />

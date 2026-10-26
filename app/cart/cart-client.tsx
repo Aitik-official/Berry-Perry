@@ -44,7 +44,7 @@ export function CartClient() {
         <div className="mt-8 flex justify-center gap-4">
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#1A1A1A] px-8 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg transition hover:bg-[#EB008B]"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#EB008B] px-8 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[#EB008B]/20 transition hover:bg-[#d4007d]"
           >
             <span>Shop All Products</span>
             <ArrowRight className="size-4" />
@@ -217,7 +217,7 @@ export function CartClient() {
                 />
                 <button
                   type="submit"
-                  className="rounded-lg bg-[#1A1A1A] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#EB008B]"
+                  className="rounded-lg bg-[#5CB946] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#4ea03b]"
                 >
                   Apply
                 </button>
