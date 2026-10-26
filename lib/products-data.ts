@@ -1,0 +1,361 @@
+export type ReviewItem = {
+  id: string
+  author: string
+  rating: number
+  date: string
+  title?: string
+  comment: string
+  verified?: boolean
+  helpfulCount?: number
+}
+
+export type ProductVariantItem = {
+  sku: string
+  size: string
+  color: string
+  stockQuantity: number
+  supplierBarcode?: string
+  warehouseBarcode?: string
+}
+
+export type Product = {
+  id: string
+  name: string
+  slug: string
+  gender: 'men' | 'women' | 'unisex' | 'boys' | 'girls' | 'kids' | string
+  category: string
+  mainCategory?: string
+  subCategory?: string
+  sport: string
+  price: number
+  originalPrice?: number
+  badge?: string
+  image: string
+  images: string[]
+  description: string
+  features: string[]
+  sizes: string[]
+  colors: { name: string; hex: string; image?: string }[]
+  variants?: ProductVariantItem[]
+  inStock: boolean
+  sku?: string
+  supplierBarcode?: string
+  warehouseBarcode?: string
+  stockQuantity?: number
+  lowStockThreshold?: number
+  costPrice?: number
+  supplier?: string
+  rating: number
+  reviewsCount: number
+  reviews?: ReviewItem[]
+  videoUrl?: string
+  actionVideoUrl?: string
+  sectionGroup?: string
+  sourceUrl?: string
+}
+
+export const products: Product[] = [
+  {
+    id: 'virat-pro-match-jersey',
+    name: 'Virat Pro Match Cricket Jersey',
+    slug: 'virat-pro-match-cricket-jersey',
+    gender: 'men',
+    category: 'tops',
+    sport: 'cricket',
+    price: 1899,
+    originalPrice: 2499,
+    badge: 'BESTSELLER',
+    image: '/images/category/mens.png',
+    images: ['/images/category/mens.png', '/images/collections.png'],
+    description: 'Engineered for relentless performance. Crafted with ultra-breathable moisture-wicking aerodynamic fabric to keep you cool across 50 overs.',
+    features: ['Quick-dry moisture management', 'Sublimated anti-fade print', 'Athletic stretch fit', 'Reinforced seams for rugged field play'],
+    sizes: ['S', 'M', 'L', 'XL', '2XL'],
+    colors: [{ name: 'Viridian Teal', hex: '#008b8b' }, { name: 'Deep Navy', hex: '#080d2d' }, { name: 'White', hex: '#ffffff' }],
+    inStock: true,
+    rating: 4.9,
+    reviewsCount: 142,
+    reviews: [
+      {
+        id: 'rev-1',
+        author: 'Arjun K.',
+        rating: 5,
+        date: '2026-09-28',
+        title: 'Top notch match jersey - superb airflow',
+        comment: 'Wore this in a 45-over league match under the afternoon sun. Fabric is featherlight, stays dry, and zero chafing while diving.',
+        verified: true,
+        helpfulCount: 29,
+      },
+      {
+        id: 'rev-2',
+        author: 'Rohan Sharma',
+        rating: 5,
+        date: '2026-10-04',
+        title: 'International quality feel',
+        comment: 'Color and finish look identical to what Virat wears on TV. The stitch quality around the shoulders and neck collar is top tier.',
+        verified: true,
+        helpfulCount: 18,
+      },
+      {
+        id: 'rev-3',
+        author: 'Vikram Patel',
+        rating: 4,
+        date: '2026-10-11',
+        title: 'Great athletic cut',
+        comment: 'Fits true to size for athletic builds. If you prefer a loose relaxed cut, consider sizing up one step.',
+        verified: true,
+        helpfulCount: 11,
+      },
+    ],
+  },
+  {
+    id: 'virat-women-elite-polo',
+    name: 'Virat Women’s Elite Training Polo',
+    slug: 'virat-womens-elite-training-polo',
+    gender: 'women',
+    category: 'polos',
+    sport: 'training',
+    price: 1599,
+    originalPrice: 2099,
+    badge: 'NEW',
+    image: '/images/category/women.png',
+    images: ['/images/category/women.png', '/images/collections.png'],
+    description: 'Precision engineered women’s training polo offering supreme comfort, flexibility, and anti-odor technology during intensive training sessions.',
+    features: ['4-way stretch fabric', 'Ribbed collar with red contrast tipped placket', 'Breathable mesh underarm panels', 'UV protection 30+'],
+    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    colors: [{ name: 'Coral / Navy', hex: '#080d2d' }, { name: 'White', hex: '#ffffff' }],
+    inStock: true,
+    rating: 4.8,
+    reviewsCount: 89,
+  },
+  {
+    id: 'virat-compression-baselayer-top',
+    name: 'Virat Pro Compression Baselayer Top',
+    slug: 'virat-pro-compression-baselayer-top',
+    gender: 'men',
+    category: 'compression-and-baselayers',
+    sport: 'training',
+    price: 1299,
+    originalPrice: 1699,
+    badge: 'POPULAR',
+    image: '/images/category/mens.png',
+    images: ['/images/category/mens.png'],
+    description: 'Muscular support compression baselayer designed to enhance blood circulation, prevent muscle fatigue, and accelerate recovery.',
+    features: ['Graduated compression fit', 'Flatlock anti-chafing stitching', 'Thermal regulating fabric', 'Second-skin ergonomics'],
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: [{ name: 'Deep Black', hex: '#111827' }, { name: 'Midnight Navy', hex: '#080d2d' }],
+    inStock: true,
+    rating: 4.7,
+    reviewsCount: 64,
+  },
+  {
+    id: 'virat-sleeveless-pro-vest',
+    name: 'Virat Lightweight Sleeveless Gym Vest',
+    slug: 'virat-lightweight-sleeveless-gym-vest',
+    gender: 'men',
+    category: 'sleeveless',
+    sport: 'training',
+    price: 899,
+    originalPrice: 1199,
+    image: '/images/category/mens.png',
+    images: ['/images/category/mens.png'],
+    description: 'Featherlight sleeveless vest built for maximum airflow, freedom of motion, and durability during heavy nets and gym drills.',
+    features: ['Wide armholes for zero shoulder restriction', 'Fast sweat dispersal', 'Drop-tail hem for coverage'],
+    sizes: ['M', 'L', 'XL', '2XL'],
+    colors: [{ name: 'Teal Green', hex: '#0f766e' }, { name: 'Graphite', hex: '#374151' }],
+    inStock: true,
+    rating: 4.6,
+    reviewsCount: 38,
+  },
+  {
+    id: 'virat-women-athletic-shorts',
+    name: 'Virat Women’s Pro Agility Shorts',
+    slug: 'virat-womens-pro-agility-shorts',
+    gender: 'women',
+    category: 'shorts',
+    sport: 'training',
+    price: 1199,
+    originalPrice: 1499,
+    image: '/images/category/women.png',
+    images: ['/images/category/women.png'],
+    description: 'Ultra-stretch lightweight agility shorts featuring built-in compression liner and secure zipped pockets for active training.',
+    features: ['2-in-1 inner compression liner', 'Elastic waistband with internal drawcord', 'Zipped stash pockets', 'Reflective Virat branding'],
+    sizes: ['XS', 'S', 'M', 'L'],
+    colors: [{ name: 'Midnight Navy', hex: '#080d2d' }, { name: 'Black', hex: '#18181b' }],
+    inStock: true,
+    rating: 4.8,
+    reviewsCount: 52,
+  },
+  {
+    id: 'virat-storm-tracksuit',
+    name: 'Virat All-Weather Performance Tracksuit',
+    slug: 'virat-all-weather-performance-tracksuit',
+    gender: 'unisex',
+    category: 'tracksuits',
+    sport: 'training',
+    price: 3499,
+    originalPrice: 4499,
+    badge: 'HOT',
+    image: '/images/collections.png',
+    images: ['/images/collections.png'],
+    description: 'The definitive Virat squad tracksuit. Designed for travel, warmup, and sideline comfort in any weather conditions.',
+    features: ['Wind-resistant ripstop shell', 'Soft brushed interior lining', 'Ankle zip gussets for easy on/off over shoes', 'Full zipped storm collar jacket'],
+    sizes: ['S', 'M', 'L', 'XL', '2XL'],
+    colors: [{ name: 'Teal & Black', hex: '#080d2d' }, { name: 'Crimson & Navy', hex: '#e51717' }],
+    inStock: true,
+    rating: 4.9,
+    reviewsCount: 112,
+  },
+  {
+    id: 'virat-cricket-match-whites-pants',
+    name: 'Virat Test Match White Trousers',
+    slug: 'virat-test-match-white-trousers',
+    gender: 'men',
+    category: 'pants-and-leggings',
+    sport: 'cricket',
+    price: 1399,
+    originalPrice: 1799,
+    image: '/images/category/mens.png',
+    images: ['/images/category/mens.png'],
+    description: 'Traditional cricket whites tailored with high-stretch performance poly-spandex blend for dive resilience and comfort in long matches.',
+    features: ['Reinforced knees and rear', 'Comfort stretch waistband', 'Deep ball pockets', 'Stain release treatment'],
+    sizes: ['30', '32', '34', '36', '38'],
+    colors: [{ name: 'Off-White / Cream', hex: '#fefce8' }],
+    inStock: true,
+    rating: 4.8,
+    reviewsCount: 76,
+  },
+  {
+    id: 'virat-pro-wheelie-kitbag',
+    name: 'Virat Pro Wheelie Cricket Kitbag',
+    slug: 'virat-pro-wheelie-cricket-kitbag',
+    gender: 'unisex',
+    category: 'bags-and-duffles',
+    sport: 'cricket',
+    price: 4999,
+    originalPrice: 6499,
+    badge: 'PRO CHOICE',
+    image: '/images/category/bagpack.png',
+    images: ['/images/category/bagpack.png', '/images/collections.png'],
+    description: 'Massive heavy-duty equipment bag with internal padded bat chambers, separate vented boot pocket, and tractor terrain wheels.',
+    features: ['Heavy-duty 1680D ballistic nylon', 'All-terrain tractor wheels with protective skid rails', 'Dedicated 3-bat padded compartment', 'Thermo-insulated drinks pocket'],
+    sizes: ['Standard Pro Size'],
+    colors: [{ name: 'Stealth Black & Teal', hex: '#0f172a' }],
+    inStock: true,
+    rating: 5.0,
+    reviewsCount: 95,
+  },
+  {
+    id: 'virat-championship-snapback-cap',
+    name: 'Virat Championship Curved Peak Cap',
+    slug: 'virat-championship-curved-peak-cap',
+    gender: 'unisex',
+    category: 'hats-and-caps',
+    sport: 'accessories',
+    price: 699,
+    originalPrice: 899,
+    image: '/images/category/cap.png',
+    images: ['/images/category/cap.png'],
+    description: 'Premium curved brim cricket cap with 3D high-density embroidered Virat logo and moisture-absorbing sweatband.',
+    features: ['Laser perforated ventilation holes', 'Adjustable snapback closure', 'Structured 6-panel crown', 'High-density rubberized crest'],
+    sizes: ['One Size Fits Most'],
+    colors: [{ name: 'Viridian Teal', hex: '#008b8b' }, { name: 'Midnight Navy', hex: '#080d2d' }, { name: 'Black', hex: '#000000' }],
+    inStock: true,
+    rating: 4.9,
+    reviewsCount: 168,
+  },
+  {
+    id: 'virat-elite-padded-backpack',
+    name: 'Virat Elite Multi-Sport Tech Backpack',
+    slug: 'virat-elite-multi-sport-tech-backpack',
+    gender: 'unisex',
+    category: 'bags-and-duffles',
+    sport: 'accessories',
+    price: 2499,
+    originalPrice: 3299,
+    image: '/images/category/ACCESSORIES.png',
+    images: ['/images/category/ACCESSORIES.png', '/images/collections.png'],
+    description: 'Everyday athlete backpack built for team gear, laptops, and gym essentials with ergonomic padded shoulder harness.',
+    features: ['Water-resistant PU coated base', 'Padded 15.6" laptop sleeve', 'Dual side bottle sleeves', 'Ergonomic breathable back panel'],
+    sizes: ['32 Liters'],
+    colors: [{ name: 'Teal & Black', hex: '#0f172a' }],
+    inStock: true,
+    rating: 4.7,
+    reviewsCount: 81,
+  },
+  {
+    id: 'virat-youth-cricket-academy-kit',
+    name: 'Virat Youth Cricket Academy Set',
+    slug: 'virat-youth-cricket-academy-set',
+    gender: 'unisex',
+    category: 'clothing',
+    sport: 'cricket',
+    price: 1999,
+    originalPrice: 2599,
+    badge: 'POPULAR',
+    image: '/images/category/youth.jpg',
+    images: ['/images/category/youth.jpg'],
+    description: 'Complete academy uniform set for rising stars. Includes durable match jersey, stretch pants, and breathable training cap.',
+    features: ['Tailored youth sizes', 'Fade-proof dye sublimation', 'Reinforced knee stitching', 'Hypoallergenic fabric'],
+    sizes: ['Y-Small (8-10)', 'Y-Medium (10-12)', 'Y-Large (12-14)', 'Y-XL (14-16)'],
+    colors: [{ name: 'Academy White & Navy', hex: '#080d2d' }],
+    inStock: true,
+    rating: 4.9,
+    reviewsCount: 63,
+  },
+  {
+    id: 'virat-leather-cricket-match-ball',
+    name: 'Virat Test Grade Leather Match Ball',
+    slug: 'virat-test-grade-leather-match-ball',
+    gender: 'unisex',
+    category: 'cricket-balls',
+    sport: 'cricket',
+    price: 899,
+    originalPrice: 1199,
+    image: '/images/category/ACCESSORIES.png',
+    images: ['/images/category/ACCESSORIES.png'],
+    description: 'Hand-stitched 4-piece alum tanned premium leather ball with pronounced seam and lasting lacquer for multi-day cricket.',
+    features: ['Grade A alum tanned leather', 'Handcrafted 4-piece construction', 'Pronounced cork & rubber center', 'Waterproof wax polished finish'],
+    sizes: ['Men 156g', 'Women / Youth 142g'],
+    colors: [{ name: 'Red', hex: '#b91c1c' }, { name: 'White', hex: '#ffffff' }, { name: 'Pink', hex: '#ec4899' }],
+    inStock: true,
+    rating: 4.8,
+    reviewsCount: 77,
+  },
+]
+
+export const categoryOptions = [
+  { value: 'all', label: 'All Categories' },
+  { value: 'baby-diapering', label: 'Baby Diapering' },
+  { value: 'feeding-nursing', label: 'Feeding & Nursing' },
+  { value: 'bath-skin-care-products', label: 'Bath & Skin Care Products' },
+  { value: 'health-safety-products', label: 'Health & Safety Products' },
+  { value: 'toys-gaming', label: 'Toys & Gaming' },
+  { value: 'baby-kids-clothing', label: 'Baby & Kids Clothing' },
+  { value: 'fashion-accessories', label: 'Fashion Accessories' },
+  { value: 'baby-kids-footwear', label: 'Baby & Kids Footwear' },
+  { value: 'nursery-furniture-decor', label: 'Nursery Furniture & Decor' },
+  { value: 'baby-gear', label: 'Baby Gear' },
+  { value: 'birthday-party-supplies', label: 'Birthday Party Supplies' },
+  { value: 'baby-kids-gifts', label: 'Baby & Kids Gifts' },
+  { value: 'kids-books-cds', label: "Kids Books & CD's" },
+  { value: 'school-supplies', label: 'School Supplies' },
+  { value: 'moms-maternity', label: 'Moms & Maternity' },
+  { value: 'combo-packs', label: 'Combo Packs & Offers' },
+  { value: 'guaranteed-savings-offer', label: 'Guaranteed Savings & Brands' },
+]
+
+export const sportOptions = [
+  { value: 'all', label: 'All Sports' },
+  { value: 'cricket', label: 'Cricket' },
+  { value: 'football', label: 'Football' },
+  { value: 'shooting', label: 'Shooting' },
+  { value: 'training', label: 'Training' },
+  { value: 'accessories', label: 'Accessories' },
+]
+
+export const genderOptions = [
+  { value: 'all', label: 'All' },
+  { value: 'men', label: 'Men' },
+  { value: 'women', label: 'Women' },
+  { value: 'unisex', label: 'Unisex' },
+]
