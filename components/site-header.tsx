@@ -279,14 +279,28 @@ export function SiteHeader() {
     <>
       {/* AVONE STYLE TOP BAR: Slimmer Vibrant Pink with Scalloped Wavy Edge */}
       <div className="relative z-50 bg-[#ff6b9d] text-white select-none">
-        <div className="mx-auto flex h-7 sm:h-8 max-w-[1440px] items-center justify-center px-4 text-center">
-          <Link
-            href="/products?badge=deal"
-            className="group inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold tracking-wide text-white hover:underline"
-          >
-            <span>Free Shipping on Orders Over $50! Shop Now</span>
-            <span className="text-xs transition-transform group-hover:scale-125">🎉</span>
-          </Link>
+        <div className="mx-auto flex h-7 sm:h-8 max-w-[1440px] items-center justify-center px-3 sm:px-4 text-center">
+          {announcementItems.length > 0 ? (
+            <Link
+              href={announcementItems[desktopAnnouncementIndex]?.linkHref || '/products?badge=new'}
+              className="group inline-flex items-center gap-1.5 text-[10px] sm:text-[11.5px] font-semibold tracking-wide text-white hover:underline truncate max-w-[95vw]"
+            >
+              <span className="truncate">{announcementItems[desktopAnnouncementIndex]?.text}</span>
+              {announcementItems[desktopAnnouncementIndex]?.linkText && (
+                <span className="shrink-0 font-bold underline ml-1">
+                  {announcementItems[desktopAnnouncementIndex]?.linkText}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <Link
+              href="/products?badge=new"
+              className="group inline-flex items-center gap-1.5 text-[10px] sm:text-[11.5px] font-semibold tracking-wide text-white hover:underline truncate max-w-[95vw]"
+            >
+              <span className="truncate">👶 Free All-India Shipping on Orders Over ₹999 • Use Code &quot;BERRY10&quot;</span>
+              <span className="text-xs transition-transform group-hover:scale-125 shrink-0">🎉</span>
+            </Link>
+          )}
         </div>
 
         {/* Scalloped Wavy Bottom Border */}

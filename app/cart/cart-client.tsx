@@ -39,7 +39,7 @@ export function CartClient() {
           Your Shopping Bag is Empty
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Explore our latest collection of vibrant activewear, custom apparel, and lifestyle accessories.
+          Explore our latest collection of baby wear, newborn essentials, educational toys, and kids fashion.
         </p>
         <div className="mt-8 flex justify-center gap-4">
           <Link
