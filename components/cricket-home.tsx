@@ -66,7 +66,7 @@ export function Header() {
         <Link href="#top" className="relative flex h-14 w-32 shrink-0 items-center sm:w-36" aria-label="Berry Perry home">
           <Image
             src={siteAssets.logo}
-            alt="Virat Sports"
+            alt="Berry Perry"
             width={160}
             height={60}
             className="max-h-full w-auto object-contain"
@@ -234,7 +234,7 @@ export function HeroSlider() {
         >
           <Image
             src={src}
-            alt={`Virat Sports Performance Campaign ${index + 1}`}
+            alt={`Berry Perry Campaign ${index + 1}`}
             fill
             priority={index === 0}
             className="object-contain sm:object-cover object-center pointer-events-none"

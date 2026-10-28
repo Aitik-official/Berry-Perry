@@ -64,7 +64,7 @@ export function ProductsClient() {
         if (data.products && Array.isArray(data.products)) {
           setProductsList(data.products)
           try {
-            localStorage.setItem('virat_admin_products_v1', JSON.stringify(data.products))
+            localStorage.setItem('berryperry_admin_products_v1', JSON.stringify(data.products))
           } catch {}
         }
       })
@@ -88,7 +88,7 @@ export function ProductsClient() {
 
     const sync = () => {
       try {
-        const stored = localStorage.getItem('virat_admin_products_v1')
+        const stored = localStorage.getItem('berryperry_admin_products_v1') || localStorage.getItem('virat_admin_products_v1')
         if (stored) {
           const parsed = JSON.parse(stored)
           if (Array.isArray(parsed)) {

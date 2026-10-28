@@ -57,7 +57,7 @@ export type Product = {
 export const products: Product[] = [
   {
     id: 'virat-pro-match-jersey',
-    name: 'Virat Pro Match Cricket Jersey',
+    name: 'Berry Perry Pro Match Cricket Jersey',
     slug: 'virat-pro-match-cricket-jersey',
     gender: 'men',
     category: 'tops',
@@ -91,7 +91,7 @@ export const products: Product[] = [
         rating: 5,
         date: '2026-10-04',
         title: 'International quality feel',
-        comment: 'Color and finish look identical to what Virat wears on TV. The stitch quality around the shoulders and neck collar is top tier.',
+        comment: 'Color and finish look identical to pro standards. The stitch quality around the shoulders and neck collar is top tier.',
         verified: true,
         helpfulCount: 18,
       },
@@ -109,7 +109,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-women-elite-polo',
-    name: 'Virat Women’s Elite Training Polo',
+    name: 'Berry Perry Women’s Elite Training Polo',
     slug: 'virat-womens-elite-training-polo',
     gender: 'women',
     category: 'polos',
@@ -129,7 +129,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-compression-baselayer-top',
-    name: 'Virat Pro Compression Baselayer Top',
+    name: 'Berry Perry Pro Compression Baselayer Top',
     slug: 'virat-pro-compression-baselayer-top',
     gender: 'men',
     category: 'compression-and-baselayers',
@@ -149,7 +149,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-sleeveless-pro-vest',
-    name: 'Virat Lightweight Sleeveless Gym Vest',
+    name: 'Berry Perry Lightweight Sleeveless Gym Vest',
     slug: 'virat-lightweight-sleeveless-gym-vest',
     gender: 'men',
     category: 'sleeveless',
@@ -168,7 +168,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-women-athletic-shorts',
-    name: 'Virat Women’s Pro Agility Shorts',
+    name: 'Berry Perry Women’s Pro Agility Shorts',
     slug: 'virat-womens-pro-agility-shorts',
     gender: 'women',
     category: 'shorts',
@@ -178,7 +178,7 @@ export const products: Product[] = [
     image: '/images/category/women.png',
     images: ['/images/category/women.png'],
     description: 'Ultra-stretch lightweight agility shorts featuring built-in compression liner and secure zipped pockets for active training.',
-    features: ['2-in-1 inner compression liner', 'Elastic waistband with internal drawcord', 'Zipped stash pockets', 'Reflective Virat branding'],
+    features: ['2-in-1 inner compression liner', 'Elastic waistband with internal drawcord', 'Zipped stash pockets', 'Reflective Berry Perry branding'],
     sizes: ['XS', 'S', 'M', 'L'],
     colors: [{ name: 'Midnight Navy', hex: '#080d2d' }, { name: 'Black', hex: '#18181b' }],
     inStock: true,
@@ -187,7 +187,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-storm-tracksuit',
-    name: 'Virat All-Weather Performance Tracksuit',
+    name: 'Berry Perry All-Weather Performance Tracksuit',
     slug: 'virat-all-weather-performance-tracksuit',
     gender: 'unisex',
     category: 'tracksuits',
@@ -197,7 +197,7 @@ export const products: Product[] = [
     badge: 'HOT',
     image: '/images/collections.png',
     images: ['/images/collections.png'],
-    description: 'The definitive Virat squad tracksuit. Designed for travel, warmup, and sideline comfort in any weather conditions.',
+    description: 'The definitive Berry Perry squad tracksuit. Designed for travel, warmup, and sideline comfort in any weather conditions.',
     features: ['Wind-resistant ripstop shell', 'Soft brushed interior lining', 'Ankle zip gussets for easy on/off over shoes', 'Full zipped storm collar jacket'],
     sizes: ['S', 'M', 'L', 'XL', '2XL'],
     colors: [{ name: 'Teal & Black', hex: '#080d2d' }, { name: 'Crimson & Navy', hex: '#e51717' }],
@@ -207,7 +207,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-cricket-match-whites-pants',
-    name: 'Virat Test Match White Trousers',
+    name: 'Berry Perry Test Match White Trousers',
     slug: 'virat-test-match-white-trousers',
     gender: 'men',
     category: 'pants-and-leggings',
@@ -226,7 +226,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-pro-wheelie-kitbag',
-    name: 'Virat Pro Wheelie Cricket Kitbag',
+    name: 'Berry Perry Pro Wheelie Cricket Kitbag',
     slug: 'virat-pro-wheelie-cricket-kitbag',
     gender: 'unisex',
     category: 'bags-and-duffles',
@@ -246,7 +246,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-championship-snapback-cap',
-    name: 'Virat Championship Curved Peak Cap',
+    name: 'Berry Perry Championship Curved Peak Cap',
     slug: 'virat-championship-curved-peak-cap',
     gender: 'unisex',
     category: 'hats-and-caps',
@@ -255,7 +255,7 @@ export const products: Product[] = [
     originalPrice: 899,
     image: '/images/category/cap.png',
     images: ['/images/category/cap.png'],
-    description: 'Premium curved brim cricket cap with 3D high-density embroidered Virat logo and moisture-absorbing sweatband.',
+    description: 'Premium curved brim cricket cap with 3D high-density embroidered Berry Perry logo and moisture-absorbing sweatband.',
     features: ['Laser perforated ventilation holes', 'Adjustable snapback closure', 'Structured 6-panel crown', 'High-density rubberized crest'],
     sizes: ['One Size Fits Most'],
     colors: [{ name: 'Viridian Teal', hex: '#008b8b' }, { name: 'Midnight Navy', hex: '#080d2d' }, { name: 'Black', hex: '#000000' }],
@@ -265,7 +265,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-elite-padded-backpack',
-    name: 'Virat Elite Multi-Sport Tech Backpack',
+    name: 'Berry Perry Elite Multi-Sport Tech Backpack',
     slug: 'virat-elite-multi-sport-tech-backpack',
     gender: 'unisex',
     category: 'bags-and-duffles',
@@ -284,7 +284,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-youth-cricket-academy-kit',
-    name: 'Virat Youth Cricket Academy Set',
+    name: 'Berry Perry Youth Cricket Academy Set',
     slug: 'virat-youth-cricket-academy-set',
     gender: 'unisex',
     category: 'clothing',
@@ -304,7 +304,7 @@ export const products: Product[] = [
   },
   {
     id: 'virat-leather-cricket-match-ball',
-    name: 'Virat Test Grade Leather Match Ball',
+    name: 'Berry Perry Test Grade Leather Match Ball',
     slug: 'virat-test-grade-leather-match-ball',
     gender: 'unisex',
     category: 'cricket-balls',

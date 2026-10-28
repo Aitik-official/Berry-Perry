@@ -215,7 +215,7 @@ export type SiteMediaAssets = {
 export const defaultShowcaseProducts: ShowcaseProductItem[] = [
   {
     productSlug: 'virat-pro-match-cricket-jersey',
-    tag: 'Worn by Virat',
+    tag: 'Berry Perry Featured',
     quickDescription: 'Ultra-breathable micro-mesh engineered for maximum airflow and match intensity.',
     reel1Title: 'Cover Drive & Bat Speed Drill',
     reel1Label: 'Batting Reel',

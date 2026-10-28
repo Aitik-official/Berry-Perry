@@ -37,7 +37,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Load from localStorage on client mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('virat_cart')
+      const saved = localStorage.getItem('berryperry_cart') || localStorage.getItem('virat_cart')
       if (saved) {
         const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) {
@@ -52,7 +52,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     // Also sync if another tab modifies the cart
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'virat_cart') {
+      if (e.key === 'berryperry_cart' || e.key === 'virat_cart') {
         try {
           if (e.newValue) {
             setItems(JSON.parse(e.newValue))
@@ -70,7 +70,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isInitialized) return
     try {
-      localStorage.setItem('virat_cart', JSON.stringify(items))
+      localStorage.setItem('berryperry_cart', JSON.stringify(items))
     } catch {
       // ignore
     }

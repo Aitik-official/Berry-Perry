@@ -73,11 +73,11 @@ export function OrdersTab() {
       if (res.ok && data.orders && data.orders.length > 0) {
         setOrders(data.orders)
         try {
-          localStorage.setItem('virat_store_orders_v1', JSON.stringify(data.orders))
+          localStorage.setItem('berryperry_store_orders_v1', JSON.stringify(data.orders))
         } catch {}
       } else {
         // Fallback to local storage if DB is empty or offline
-        const local = localStorage.getItem('virat_store_orders_v1')
+        const local = localStorage.getItem('berryperry_store_orders_v1') || localStorage.getItem('virat_store_orders_v1')
         if (local) {
           setOrders(JSON.parse(local))
         } else {
@@ -85,7 +85,7 @@ export function OrdersTab() {
         }
       }
     } catch {
-      const local = localStorage.getItem('virat_store_orders_v1')
+      const local = localStorage.getItem('berryperry_store_orders_v1') || localStorage.getItem('virat_store_orders_v1')
       if (local) setOrders(JSON.parse(local))
       else setOrders([])
     } finally {

@@ -107,9 +107,13 @@ export function CheckoutClient() {
 
     // Offline backup for admin order management
     try {
-      const existing = JSON.parse(localStorage.getItem('virat_store_orders_v1') || '[]')
+      const existing = JSON.parse(
+        localStorage.getItem('berryperry_store_orders_v1') ||
+        localStorage.getItem('virat_store_orders_v1') ||
+        '[]'
+      )
       localStorage.setItem(
-        'virat_store_orders_v1',
+        'berryperry_store_orders_v1',
         JSON.stringify([
           {
             ...orderPayload,

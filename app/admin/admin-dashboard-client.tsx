@@ -34,7 +34,7 @@ export function AdminDashboardClient({ initialTab }: { initialTab?: AdminTab }) 
     if (queryTab && VALID_TABS.includes(queryTab)) return queryTab
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('virat_admin_active_tab') as AdminTab | null
+        const saved = (localStorage.getItem('berryperry_admin_active_tab') || localStorage.getItem('virat_admin_active_tab')) as AdminTab | null
         if (saved && VALID_TABS.includes(saved)) return saved
       } catch {}
     }
@@ -45,7 +45,7 @@ export function AdminDashboardClient({ initialTab }: { initialTab?: AdminTab }) 
   const setActiveTab = (tab: AdminTab) => {
     setActiveTabState(tab)
     try {
-      localStorage.setItem('virat_admin_active_tab', tab)
+      localStorage.setItem('berryperry_admin_active_tab', tab)
     } catch {}
     router.replace(`/admin?tab=${tab}`, { scroll: false })
   }

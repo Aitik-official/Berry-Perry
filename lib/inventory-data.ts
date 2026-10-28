@@ -83,10 +83,10 @@ export interface SupplierItem {
 export const defaultSuppliers: SupplierItem[] = [
   {
     supplierId: 'SUP-001',
-    name: 'Virat Elite Textiles & Sportswear Ltd.',
-    code: 'VET-01',
+    name: 'Berry Perry Elite Apparel & Goods Ltd.',
+    code: 'BPE-01',
     contactPerson: 'Karan Mehra',
-    email: 'supply@virattextiles.com',
+    email: 'supply@berryperry.com',
     phone: '+91 98201 11223',
     gstin: '07AAAAA1234A1Z5',
     paymentTerms: 'Net 30',
@@ -182,7 +182,7 @@ export const defaultPurchaseOrders: PurchaseOrderItem[] = [
   {
     poNumber: 'PO-2026-004',
     supplierId: 'SUP-001',
-    supplierName: 'Virat Elite Textiles & Sportswear Ltd.',
+    supplierName: 'Berry Perry Elite Apparel & Goods Ltd.',
     supplierGstin: '07AAAAA1234A1Z5',
     items: [
       {

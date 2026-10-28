@@ -54,7 +54,7 @@ const showcaseProducts: ProductShowcaseItem[] = [
     rating: 4.9,
     reviewsCount: 342,
     image: '/images/category/mens.png',
-    tag: 'Worn by Virat',
+    tag: 'Berry Perry Featured',
     description:
       'Ultra-breathable micro-mesh engineered for high-intensity cricket matches. Built with anti-chafing ergonomic seams.',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],

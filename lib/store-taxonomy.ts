@@ -114,13 +114,22 @@ export const defaultMainCategories: MainCategoryItem[] = [
     order: 4,
   },
   {
+    id: 'main-ladies-wear',
+    label: 'Ladies Wear',
+    value: 'ladies-wear',
+    navAlias: 'LADIES WEAR',
+    showOnNavbar: true,
+    description: 'Ladies Wear, tops, dresses, and activewear collections',
+    order: 5,
+  },
+  {
     id: 'main-baby-gear',
     label: 'Baby Gear',
     value: 'baby-gear',
     navAlias: '',
     showOnNavbar: true,
     description: 'Baby Gear collections',
-    order: 5,
+    order: 6,
   },
   ...firstCryCategoryHierarchy
     .filter(
@@ -131,6 +140,7 @@ export const defaultMainCategories: MainCategoryItem[] = [
           'baby-kids-clothing',
           'baby-kids-footwear',
           'baby-gear',
+          'ladies-wear',
         ].includes(cat.slug)
     )
     .map((cat, idx) => ({
@@ -140,20 +150,50 @@ export const defaultMainCategories: MainCategoryItem[] = [
       navAlias: '',
       showOnNavbar: false,
       description: `${cat.name} collections`,
-      order: idx + 6,
+      order: idx + 7,
     })),
 ]
 
-export const defaultCategories: CategoryItem[] = firstCryCategoryHierarchy.flatMap((cat) =>
-  cat.children.map((sub, sIdx) => ({
-    id: sub.id,
-    label: sub.name,
-    value: sub.slug,
-    parentCategory: cat.slug,
-    description: `${sub.name} under ${cat.name}`,
-    image: '',
-  }))
-)
+export const ladiesWearSubCategories: CategoryItem[] = [
+  {
+    id: 'sub-ladies-tops-tees',
+    label: 'Tops & T-Shirts',
+    value: 'ladies-tops-tees',
+    parentCategory: 'ladies-wear',
+    description: 'Tops & T-Shirts under Ladies Wear',
+    image: 'https://cdn.fcglcdn.com/brainbees/images/products/400x485/20440257a.jpg',
+  },
+  {
+    id: 'sub-ladies-dresses',
+    label: 'Dresses & Jumpsuits',
+    value: 'ladies-dresses',
+    parentCategory: 'ladies-wear',
+    description: 'Dresses & Jumpsuits under Ladies Wear',
+    image: 'https://cdn.fcglcdn.com/brainbees/images/products/400x485/23694428a.jpg',
+  },
+  {
+    id: 'sub-ladies-activewear',
+    label: 'Activewear & Leggings',
+    value: 'ladies-activewear',
+    parentCategory: 'ladies-wear',
+    description: 'Activewear & Leggings under Ladies Wear',
+    image: 'https://cdn.fcglcdn.com/brainbees/images/products/400x485/24005653a.jpg',
+  },
+]
+
+export const defaultCategories: CategoryItem[] = [
+  ...ladiesWearSubCategories,
+  ...firstCryCategoryHierarchy.flatMap((cat) =>
+    cat.children.map((sub, sIdx) => ({
+      id: sub.id,
+      label: sub.name,
+      value: sub.slug,
+      parentCategory: cat.slug,
+      description: `${sub.name} under ${cat.name}`,
+      image: '',
+    }))
+  ),
+]
 
 export const defaultSports: SportItem[] = [
   { id: 'sp-clothing', label: 'Baby & Kids Clothing', value: 'clothing' },

@@ -166,6 +166,7 @@ export function SiteHeader() {
     if (/footwear/i.test(l)) return 'FOOTWEAR'
     if (/maternity/i.test(l)) return 'MOMS'
     if (/gear/i.test(l)) return 'BABY GEAR'
+    if (/ladies/i.test(l)) return 'LADIES WEAR'
     return l.replace(/\s+products$/i, '').toUpperCase()
   }
 

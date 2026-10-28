@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const AUTH_COOKIE_NAME = "virat_admin_auth";
+export const AUTH_COOKIE_NAME = "berryperry_admin_auth";
 
 /**
  * Verifies whether the incoming request contains a valid admin session cookie.
@@ -9,7 +9,7 @@ export const AUTH_COOKIE_NAME = "virat_admin_auth";
 export async function verifyAdminAuth(): Promise<boolean> {
   try {
     const cookieStore = await cookies();
-    const authCookie = cookieStore.get(AUTH_COOKIE_NAME);
+    const authCookie = cookieStore.get(AUTH_COOKIE_NAME) || cookieStore.get("virat_admin_auth");
     return Boolean(authCookie && authCookie.value === "authenticated");
   } catch {
     return false;

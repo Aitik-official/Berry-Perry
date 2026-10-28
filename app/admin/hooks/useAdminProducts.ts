@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { products as initialStaticProducts, type Product } from '@/lib/products-data'
 
-export const PRODUCTS_STORAGE_KEY = 'virat_admin_products_v1'
+export const PRODUCTS_STORAGE_KEY = 'berryperry_admin_products_v1'
 
 export function useAdminProducts(triggerToast: (msg: string) => void) {
   const [products, setProducts] = useState<Product[]>([])

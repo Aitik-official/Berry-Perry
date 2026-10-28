@@ -30,7 +30,7 @@ export function ProductDetailsClient({
   useEffect(() => {
     const sync = () => {
       try {
-        const stored = localStorage.getItem('virat_admin_products_v1')
+        const stored = localStorage.getItem('berryperry_admin_products_v1') || localStorage.getItem('virat_admin_products_v1')
         if (stored) {
           const list: Product[] = JSON.parse(stored)
           const found = list.find((p) => p.slug === initialProduct.slug || p.id === initialProduct.id)
@@ -120,13 +120,13 @@ export function ProductDetailsClient({
         }),
       })
 
-      const stored = localStorage.getItem('virat_admin_products_v1')
+      const stored = localStorage.getItem('berryperry_admin_products_v1') || localStorage.getItem('virat_admin_products_v1')
       if (stored) {
         const list: Product[] = JSON.parse(stored)
         const updatedList = list.map((p) =>
           p.id === product.id || p.slug === product.slug ? updatedProduct : p
         )
-        localStorage.setItem('virat_admin_products_v1', JSON.stringify(updatedList))
+        localStorage.setItem('berryperry_admin_products_v1', JSON.stringify(updatedList))
         window.dispatchEvent(new Event('storage'))
       }
     } catch {}

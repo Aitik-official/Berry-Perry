@@ -19,7 +19,7 @@ export function CartClient() {
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault()
     const code = promoCode.trim().toUpperCase()
-    if (code === 'BERRY10' || code === 'VIRAT10') {
+    if (code === 'BERRY10' || code === 'BERRYPERRY10') {
       const disc = Math.round(subtotal * 0.1)
       setDiscount(disc)
       setPromoApplied(true)

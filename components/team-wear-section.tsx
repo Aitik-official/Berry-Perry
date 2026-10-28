@@ -12,7 +12,7 @@ export interface TeamwearSlide {
 
 const DEFAULT_SLIDES: TeamwearSlide[] = defaultSiteAssets.teamwearSlides.map((img) => ({
   image: img,
-  alt: 'Virat Custom Teamwear Gear',
+  alt: 'Berry Perry Custom Teamwear Gear',
 }))
 
 export function TeamWearSection({
@@ -27,7 +27,7 @@ export function TeamWearSection({
     const update = () => {
       const active = getActiveSiteAssets()
       if (active.teamwearSlides?.length) {
-        setSlides(active.teamwearSlides.map((img) => ({ image: img, alt: 'Virat Custom Teamwear' })))
+        setSlides(active.teamwearSlides.map((img) => ({ image: img, alt: 'Berry Perry Custom Teamwear' })))
       }
     }
     update()
@@ -36,7 +36,7 @@ export function TeamWearSection({
       .then((res) => res.json())
       .then((data) => {
         if (data.media?.teamwearSlides?.length > 0) {
-          setSlides(data.media.teamwearSlides.map((img: string) => ({ image: img, alt: 'Virat Custom Teamwear' })))
+          setSlides(data.media.teamwearSlides.map((img: string) => ({ image: img, alt: 'Berry Perry Custom Teamwear' })))
         }
       })
       .catch(() => {})

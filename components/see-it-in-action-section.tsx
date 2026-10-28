@@ -29,7 +29,7 @@ export function SeeItInActionSection() {
         setShowcaseItems(active.showcaseProducts)
       }
       try {
-        const storedProds = localStorage.getItem('virat_admin_products_v1')
+        const storedProds = localStorage.getItem('berryperry_admin_products_v1') || localStorage.getItem('virat_admin_products_v1')
         if (storedProds) setDynamicProducts(JSON.parse(storedProds))
       } catch {}
     }
