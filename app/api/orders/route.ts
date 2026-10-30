@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import UnitBarcode from "@/models/UnitBarcode";
+import InventoryTransaction from "@/models/InventoryTransaction";
+import Waste from "@/models/Waste";
 import { verifyAdminAuth, unauthorizedResponse } from "@/lib/admin-auth";
 
 export const dynamic = 'force-dynamic'
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH update order status (e.g., mark as shipped or delivered)
+// PATCH update order status (e.g., mark as shipped, delivered, or returned with inventory reconciliation)
 export async function PATCH(request: NextRequest) {
   if (!(await verifyAdminAuth())) {
     return unauthorizedResponse("Admin authentication required to update order status");
@@ -117,7 +120,16 @@ export async function PATCH(request: NextRequest) {
   try {
     await connectToDatabase();
     const body = await request.json();
-    const { orderId, orderStatus, paymentStatus } = body;
+    const {
+      orderId,
+      orderStatus,
+      paymentStatus,
+      trackingNumber,
+      courier,
+      returnType,
+      returnReason,
+      notes,
+    } = body;
 
     if (!orderId) {
       return NextResponse.json(
@@ -126,17 +138,110 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateFields: any = {};
-    if (orderStatus) updateFields.orderStatus = orderStatus;
-    if (paymentStatus) updateFields.paymentStatus = paymentStatus;
+    const order = await Order.findOne({
+      $or: [{ _id: orderId.match(/^[0-9a-fA-F]{24}$/) ? orderId : null }, { orderNumber: orderId }].filter(Boolean),
+    });
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
-      { $set: updateFields },
-      { new: true }
-    );
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
 
-    return NextResponse.json({ success: true, order: updatedOrder });
+    const previousStatus = order.orderStatus;
+
+    if (orderStatus) order.orderStatus = orderStatus;
+    if (paymentStatus) order.paymentStatus = paymentStatus;
+    if (trackingNumber !== undefined) order.trackingNumber = trackingNumber;
+    if (courier !== undefined) order.courier = courier;
+    if (notes !== undefined) order.notes = notes;
+
+    // Handle interactive returns reconciliation
+    if (orderStatus === "returned" && previousStatus !== "returned") {
+      order.returnType = returnType || "RESTOCK";
+      order.returnReason = returnReason || "Order returned by customer";
+
+      for (const item of order.items) {
+        const product = await Product.findOne({
+          $or: [{ id: item.productId }, { _id: item.productId }],
+        });
+
+        if (order.returnType === "RESTOCK") {
+          // Re-increment inventory stock
+          if (product) {
+            const currentStock = typeof product.stockQuantity === "number" ? product.stockQuantity : 25;
+            const newStock = currentStock + (item.quantity || 1);
+            product.stockQuantity = newStock;
+            product.inStock = true;
+            await product.save();
+
+            await InventoryTransaction.create({
+              transactionId: `TXN-${Date.now().toString().slice(-6)}`,
+              productId: product.id,
+              productName: product.name,
+              sku: (product as any).sku || `VS-${product.id.slice(0, 8).toUpperCase()}`,
+              type: "RETURN",
+              quantityChange: item.quantity || 1,
+              previousStock: currentStock,
+              newStock,
+              reference: order.orderNumber,
+              reason: returnReason || "Order returned - restocked to warehouse",
+              performedBy: "Admin (Orders Hub)",
+            });
+          }
+
+          if (item.unitBarcode) {
+            await UnitBarcode.updateOne(
+              { barcode: item.unitBarcode },
+              { $set: { status: "AVAILABLE", soldAt: null, reason: "" } }
+            );
+          }
+        } else {
+          // Shift to DEFECTIVE / Waste write-off (do NOT increment sellable stock)
+          if (product) {
+            const currentStock = typeof product.stockQuantity === "number" ? product.stockQuantity : 25;
+            const productSku = (product as any).sku || `VS-${product.id.slice(0, 8).toUpperCase()}`;
+
+            await Waste.create({
+              wasteId: `WST-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+              productId: product.id,
+              productName: product.name,
+              sku: productSku,
+              unitBarcode: item.unitBarcode || undefined,
+              quantity: item.quantity || 1,
+              category: "DEFECTIVE",
+              estimatedLoss: Math.round(Number(product.price) * 0.55 * (item.quantity || 1)),
+              reason: returnReason || "Customer return defective piece write-off",
+              disposition: "SCRAPPED",
+              reportedBy: "Admin (Orders Hub)",
+            });
+
+            await InventoryTransaction.create({
+              transactionId: `TXN-${Date.now().toString().slice(-6)}`,
+              productId: product.id,
+              productName: product.name,
+              sku: productSku,
+              type: "DAMAGE",
+              quantityChange: 0,
+              previousStock: currentStock,
+              newStock: currentStock,
+              reference: order.orderNumber,
+              reason: returnReason || "Returned unit marked defective",
+              performedBy: "Admin (Orders Hub)",
+            });
+          }
+
+          if (item.unitBarcode) {
+            await UnitBarcode.updateOne(
+              { barcode: item.unitBarcode },
+              { $set: { status: "DAMAGED", reason: returnReason || "Customer returned defective" } }
+            );
+          }
+        }
+      }
+    }
+
+    await order.save();
+
+    return NextResponse.json({ success: true, order });
   } catch (error: any) {
     console.error("PATCH /api/orders error:", error);
     return NextResponse.json(

@@ -1,32 +1,149 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { connectToDatabase } from '@/lib/mongodb'
+import Product from '@/models/Product'
+import UnitBarcode from '@/models/UnitBarcode'
+import InventoryTransaction from '@/models/InventoryTransaction'
+import Waste from '@/models/Waste'
+import Order from '@/models/Order'
 import { defaultOrderReturns, type OrderReturnItem } from '@/lib/inventory-data'
-import { getStoredProducts, saveStoredProducts } from '@/lib/products-server'
+import { verifyAdminAuth, unauthorizedResponse } from '@/lib/admin-auth'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+// In-memory cache fallback if returns collection is empty
 let inMemoryReturns = [...defaultOrderReturns]
 
 export async function GET() {
+  if (!(await verifyAdminAuth())) {
+    return unauthorizedResponse('Admin authentication required')
+  }
+
   return NextResponse.json({ returns: inMemoryReturns })
 }
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json()
-    const { orderNumber, customerName, items } = body
+export async function POST(req: NextRequest) {
+  if (!(await verifyAdminAuth())) {
+    return unauthorizedResponse('Admin authentication required')
+  }
 
-    if (!orderNumber || !items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Missing return request details' }, { status: 400 })
+  try {
+    await connectToDatabase()
+    const body = await req.json()
+    const { orderNumber, customerName, items, returnType = 'RESTOCK', reason = 'Customer return' } = body
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'Missing return request items' }, { status: 400 })
     }
 
-    const totalRefund = items.reduce((sum: number, it: any) => sum + (it.unitRefund * it.quantity), 0)
+    const totalRefund = items.reduce((sum: number, it: any) => sum + ((it.unitRefund || it.price || 0) * it.quantity), 0)
+    const returnNumber = `RET-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`
+    const creditNoteNumber = `CN-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`
+
+    // Process each item according to returnType
+    for (const item of items) {
+      const product = await Product.findOne({
+        $or: [{ id: item.productId }, { _id: item.productId }],
+      })
+
+      if (returnType === 'RESTOCK' || item.restockable) {
+        // Restock to available sellable inventory
+        if (product) {
+          const currentStock = typeof product.stockQuantity === 'number' ? product.stockQuantity : 25
+          const newStock = currentStock + (item.quantity || 1)
+          product.stockQuantity = newStock
+          product.inStock = true
+          await product.save()
+
+          await InventoryTransaction.create({
+            transactionId: `TXN-${Date.now().toString().slice(-6)}`,
+            productId: product.id,
+            productName: product.name,
+            sku: item.sku || (product as any).sku || `VS-${product.id.slice(0, 8).toUpperCase()}`,
+            type: 'RETURN',
+            quantityChange: item.quantity || 1,
+            previousStock: currentStock,
+            newStock,
+            reference: orderNumber || returnNumber,
+            reason: reason || 'Customer return restocked to inventory',
+            performedBy: 'Admin (Returns Hub)',
+          })
+        }
+
+        if (item.unitBarcode) {
+          await UnitBarcode.updateOne(
+            { barcode: item.unitBarcode },
+            { $set: { status: 'AVAILABLE', soldAt: null, reason: '' } }
+          )
+        }
+      } else {
+        // Shift to defective / waste write-off
+        if (product) {
+          const currentStock = typeof product.stockQuantity === 'number' ? product.stockQuantity : 25
+          const productSku = item.sku || (product as any).sku || `VS-${product.id.slice(0, 8).toUpperCase()}`
+
+          // Waste record
+          await Waste.create({
+            wasteId: `WST-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+            productId: product.id,
+            productName: product.name,
+            sku: productSku,
+            unitBarcode: item.unitBarcode || undefined,
+            quantity: item.quantity || 1,
+            category: 'DEFECTIVE',
+            estimatedLoss: Math.round(Number(product.price) * 0.55 * (item.quantity || 1)),
+            reason: reason || 'Customer returned damaged/defective unit',
+            disposition: 'SCRAPPED',
+            reportedBy: 'Admin (Returns Hub)',
+          })
+
+          await InventoryTransaction.create({
+            transactionId: `TXN-${Date.now().toString().slice(-6)}`,
+            productId: product.id,
+            productName: product.name,
+            sku: productSku,
+            type: 'DAMAGE',
+            quantityChange: 0, // already deducted at sale time, so zero net balance change to available
+            previousStock: currentStock,
+            newStock: currentStock,
+            reference: orderNumber || returnNumber,
+            reason: reason || 'Customer return shifted to defective waste',
+            performedBy: 'Admin (Returns Hub)',
+          })
+        }
+
+        if (item.unitBarcode) {
+          await UnitBarcode.updateOne(
+            { barcode: item.unitBarcode },
+            { $set: { status: 'DAMAGED', reason: reason || 'Customer return defective' } }
+          )
+        }
+      }
+    }
+
+    // Update Order if orderNumber provided
+    if (orderNumber) {
+      await Order.updateOne(
+        { orderNumber },
+        {
+          $set: {
+            orderStatus: 'returned',
+            returnReason: reason,
+            returnType,
+            notes: `Return processed (${returnType}): ${returnNumber}. Credit Note: ${creditNoteNumber}`,
+          },
+        }
+      )
+    }
 
     const returnRecord: OrderReturnItem = {
-      returnNumber: `RET-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
-      orderNumber,
+      returnNumber,
+      orderNumber: orderNumber || 'MANUAL',
       customerName: customerName || 'Customer',
       items,
-      creditNoteNumber: `CN-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      creditNoteNumber,
       creditNoteAmt: totalRefund,
-      status: 'INSPECTED',
+      status: returnType === 'RESTOCK' ? 'RESTOCKED' : 'SCRAPPED',
       timestamp: new Date().toISOString(),
     }
 
@@ -35,46 +152,10 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       returnRecord,
+      message: `Return ${returnNumber} processed successfully as ${returnType}.`,
     })
   } catch (err: any) {
+    console.error('POST /api/returns error:', err)
     return NextResponse.json({ error: err.message || 'Failed to record return' }, { status: 500 })
-  }
-}
-
-export async function PUT(req: Request) {
-  try {
-    const body = await req.json()
-    const { returnNumber, action } = body
-
-    const targetReturn = inMemoryReturns.find((r) => r.returnNumber === returnNumber)
-    if (!targetReturn) {
-      return NextResponse.json({ error: 'Return record not found' }, { status: 404 })
-    }
-
-    if (action === 'RESTOCK') {
-      targetReturn.status = 'RESTOCKED'
-
-      const products = await getStoredProducts()
-      for (const item of targetReturn.items) {
-        if (item.restockable) {
-          const prod = products.find((p) => p.id === item.productId)
-          if (prod) {
-            const currentStock = typeof prod.stockQuantity === 'number' ? prod.stockQuantity : (prod.inStock ? 25 : 0)
-            prod.stockQuantity = currentStock + item.quantity
-            prod.inStock = prod.stockQuantity > 0
-          }
-        }
-      }
-      await saveStoredProducts(products)
-
-      return NextResponse.json({
-        success: true,
-        returnRecord: targetReturn,
-      })
-    }
-
-    return NextResponse.json({ error: 'Invalid return action' }, { status: 400 })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to update return' }, { status: 500 })
   }
 }

@@ -20,6 +20,7 @@ import {
   InventoryStatsBar,
   InventoryNavTabs,
   InventoryLedgerSubtab,
+  InventoryBarcodesSubtab,
   InventoryAdjustStockSubtab,
   InventoryPurchaseOrdersSubtab,
   InventoryWasteSubtab,
@@ -531,6 +532,18 @@ export function InventoryManagementTab({
           products={products}
           setSubTab={setSubTab}
           onOpenAdjust={(product) => openAdjustModalWithProduct(product)}
+        />
+      )}
+
+      {/* 3.1 SUBTAB: SERIALIZED UNIT BARCODES */}
+      {subTab === 'barcodes' && (
+        <InventoryBarcodesSubtab
+          products={products}
+          triggerToast={showToast}
+          onOpenPrintModal={(product) => {
+            setBarcodeTargetProduct(product)
+            setIsPrintBarcodeModalOpen(true)
+          }}
         />
       )}
 

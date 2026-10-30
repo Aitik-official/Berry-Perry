@@ -4,6 +4,7 @@ export type { ProductVariantItem }
 
 export type InventorySubTab =
   | 'ledger'
+  | 'barcodes'
   | 'adjust-stock'
   | 'po'
   | 'waste'

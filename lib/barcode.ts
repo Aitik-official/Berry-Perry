@@ -124,3 +124,80 @@ export function generateWarehouseBarcode(prefix: string = '29'): string {
   const rand = Math.floor(10 + Math.random() * 90).toString()
   return `${prefix}${timeSlice}${rand}`
 }
+
+/**
+ * Generate standardized serialized barcode string
+ * Format: BP-[CLEAN_SKU]-[SERIAL_5_DIGITS]
+ */
+export function generateUnitBarcodeString(
+  sku: string,
+  serialNumber: number,
+  prefix: string = 'BP'
+): string {
+  const cleanSku = (sku || 'GEN')
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]/g, '')
+    .slice(0, 12)
+  const paddedSerial = String(serialNumber).padStart(5, '0')
+  return `${prefix}-${cleanSku}-${paddedSerial}`
+}
+
+export interface ThermalPreset {
+  id: string
+  name: string
+  widthMm: number
+  heightMm: number
+  labelWidthPx: number
+  labelHeightPx: number
+  barcodeHeightPx: number
+  barcodeWidthMod: number
+  cssPageSize: string
+}
+
+export const THERMAL_PRESETS: Record<string, ThermalPreset> = {
+  '50x25': {
+    id: '50x25',
+    name: '50mm × 25mm (Standard Jewelry/Hangtag)',
+    widthMm: 50,
+    heightMm: 25,
+    labelWidthPx: 189,
+    labelHeightPx: 94,
+    barcodeHeightPx: 38,
+    barcodeWidthMod: 1,
+    cssPageSize: '50mm 25mm',
+  },
+  '50x30': {
+    id: '50x30',
+    name: '50mm × 30mm (Apparel Tag)',
+    widthMm: 50,
+    heightMm: 30,
+    labelWidthPx: 189,
+    labelHeightPx: 113,
+    barcodeHeightPx: 48,
+    barcodeWidthMod: 1,
+    cssPageSize: '50mm 30mm',
+  },
+  '75x50': {
+    id: '75x50',
+    name: '75mm × 50mm (Box / Carton Label)',
+    widthMm: 75,
+    heightMm: 50,
+    labelWidthPx: 283,
+    labelHeightPx: 189,
+    barcodeHeightPx: 75,
+    barcodeWidthMod: 1.5,
+    cssPageSize: '75mm 50mm',
+  },
+  '100x150': {
+    id: '100x150',
+    name: '100mm × 150mm (4x6" Shipping Slip)',
+    widthMm: 100,
+    heightMm: 150,
+    labelWidthPx: 378,
+    labelHeightPx: 567,
+    barcodeHeightPx: 120,
+    barcodeWidthMod: 2,
+    cssPageSize: '100mm 150mm',
+  },
+}
+

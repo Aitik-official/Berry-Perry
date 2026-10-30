@@ -18,7 +18,11 @@ import {
   Banknote,
   Send,
   Loader2,
+  Printer,
+  RotateCcw,
+  AlertTriangle,
 } from 'lucide-react'
+import { PrintShippingInvoiceDialog } from '@/components/PrintShippingInvoiceDialog'
 
 export interface OrderItem {
   productId: string
@@ -28,6 +32,7 @@ export interface OrderItem {
   size?: string
   color?: string
   image?: string
+  unitBarcode?: string
 }
 
 export interface CustomerDetails {
@@ -53,7 +58,12 @@ export interface OrderRecord {
   grandTotal: number
   paymentMethod: 'card' | 'upi' | 'cod'
   paymentStatus: 'paid' | 'pending' | 'cod'
-  orderStatus: 'placed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  orderStatus: 'placed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned'
+  trackingNumber?: string
+  courier?: string
+  returnReason?: string
+  returnType?: 'RESTOCK' | 'DEFECTIVE'
+  notes?: string
   createdAt: string
 }
 
@@ -64,6 +74,16 @@ export function OrdersTab() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  // Interactive Order Return Lifecycle Modal
+  const [returnModalOrder, setReturnModalOrder] = useState<OrderRecord | null>(null)
+  const [returnType, setReturnType] = useState<'RESTOCK' | 'DEFECTIVE'>('RESTOCK')
+  const [returnReason, setReturnReason] = useState('Customer size/fit mismatch')
+  const [returnNotes, setReturnNotes] = useState('')
+  const [isSubmittingReturn, setIsSubmittingReturn] = useState(false)
+
+  // GST Invoice & Thermal Shipping Slip Print Modal
+  const [printModalOrder, setPrintModalOrder] = useState<OrderRecord | null>(null)
 
   const fetchOrders = async () => {
     setIsLoading(true)
@@ -141,10 +161,75 @@ export function OrdersTab() {
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId || o.orderNumber === orderId ? { ...o, orderStatus: newStatus } : o))
       )
+      if (selectedOrder && (selectedOrder._id === orderId || selectedOrder.orderNumber === orderId)) {
+        setSelectedOrder((prev) => prev ? { ...prev, orderStatus: newStatus } : null)
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'))
+      }
     } catch (err) {
       console.error('Failed to update status', err)
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  // Intercept status changes to launch Return triage when 'returned' is chosen
+  const handleStatusChangeRequest = (order: OrderRecord, targetStatus: OrderRecord['orderStatus']) => {
+    if (targetStatus === 'returned') {
+      setReturnModalOrder(order)
+      setReturnType('RESTOCK')
+      setReturnReason('Customer size/fit mismatch')
+      setReturnNotes('')
+    } else {
+      handleUpdateStatus(order._id || order.orderNumber, targetStatus)
+    }
+  }
+
+  // Execute interactive return workflow
+  const handleProcessReturn = async () => {
+    if (!returnModalOrder) return
+    setIsSubmittingReturn(true)
+    const currentId = returnModalOrder._id || returnModalOrder.orderNumber
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: currentId,
+          orderStatus: 'returned',
+          returnType,
+          returnReason,
+          notes: returnNotes,
+        }),
+      })
+
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setOrders((prev) =>
+          prev.map((o) =>
+            (o._id === currentId || o.orderNumber === currentId)
+              ? { ...o, orderStatus: 'returned', returnType, returnReason }
+              : o
+          )
+        )
+        if (selectedOrder && (selectedOrder._id === currentId || selectedOrder.orderNumber === currentId)) {
+          setSelectedOrder((prev) =>
+            prev ? { ...prev, orderStatus: 'returned', returnType, returnReason } : null
+          )
+        }
+        setReturnModalOrder(null)
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('storage'))
+        }
+      } else {
+        alert(data.error || 'Failed to process order return')
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error processing return')
+    } finally {
+      setIsSubmittingReturn(false)
     }
   }
 
@@ -179,7 +264,9 @@ export function OrdersTab() {
       case 'delivered':
         return 'bg-emerald-100 text-emerald-800 border-emerald-200'
       case 'cancelled':
-        return 'bg-rose-100 text-rose-800 border-rose-200'
+        return 'bg-slate-200 text-slate-800 border-slate-300'
+      case 'returned':
+        return 'bg-rose-100 text-rose-800 border-rose-200 font-bold'
       default:
         return 'bg-slate-100 text-slate-800 border-slate-200'
     }
@@ -243,6 +330,7 @@ export function OrdersTab() {
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
+            <option value="returned">Returned ({orders.filter(o => o.orderStatus === 'returned').length})</option>
           </select>
 
           <button
@@ -379,20 +467,31 @@ export function OrdersTab() {
 
                         {/* 4. Status Column */}
                         <td className="py-3.5 px-4 align-top text-center" onClick={(e) => e.stopPropagation()}>
-                          <select
-                            value={order.orderStatus}
-                            disabled={updatingId === idKey}
-                            onChange={(e) => handleUpdateStatus(idKey, e.target.value as OrderRecord['orderStatus'])}
-                            className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer transition shadow-2xs hover:shadow-xs focus:ring-2 focus:ring-[#080d2d]/20 ${getStatusBadge(
-                              order.orderStatus
-                            )}`}
-                          >
-                            <option value="placed">Placed</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <select
+                              value={order.orderStatus}
+                              disabled={updatingId === idKey}
+                              onChange={(e) => handleStatusChangeRequest(order, e.target.value as OrderRecord['orderStatus'])}
+                              className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer transition shadow-2xs hover:shadow-xs focus:ring-2 focus:ring-[#080d2d]/20 ${getStatusBadge(
+                                order.orderStatus
+                              )}`}
+                            >
+                              <option value="placed">Placed</option>
+                              <option value="processing">Processing</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="cancelled">Cancelled</option>
+                              <option value="returned">Returned</option>
+                            </select>
+                            <button
+                              type="button"
+                              title="Print GST Invoice / Shipping Slip"
+                              onClick={() => setPrintModalOrder(order)}
+                              className="rounded-lg border border-slate-200 p-1.5 text-slate-400 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800 transition"
+                            >
+                              <Printer className="size-3.5" />
+                            </button>
+                          </div>
                         </td>
 
                         {/* 5. Price Column */}
@@ -443,22 +542,33 @@ export function OrdersTab() {
                         #{order.orderNumber}
                       </span>
                     </div>
-                    <div className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <select
-                        value={order.orderStatus}
-                        disabled={updatingId === idKey}
-                        onChange={(e) => handleUpdateStatus(idKey, e.target.value as OrderRecord['orderStatus'])}
-                        className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer transition shadow-2xs ${getStatusBadge(
-                          order.orderStatus
-                        )}`}
+                    <div className="text-right flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <div>
+                        <select
+                          value={order.orderStatus}
+                          disabled={updatingId === idKey}
+                          onChange={(e) => handleStatusChangeRequest(order, e.target.value as OrderRecord['orderStatus'])}
+                          className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider outline-none cursor-pointer transition shadow-2xs ${getStatusBadge(
+                            order.orderStatus
+                          )}`}
+                        >
+                          <option value="placed">Placed</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                          <option value="returned">Returned</option>
+                        </select>
+                        <span className="block text-[9px] text-slate-400 mt-0.5">{dateStr}</span>
+                      </div>
+                      <button
+                        type="button"
+                        title="Print Shipping Slip"
+                        onClick={() => setPrintModalOrder(order)}
+                        className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-100 transition"
                       >
-                        <option value="placed">Placed</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      <span className="block text-[10px] text-slate-400 mt-1">{dateStr}</span>
+                        <Printer className="size-3.5" />
+                      </button>
                     </div>
                   </div>
 
@@ -556,17 +666,44 @@ export function OrdersTab() {
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shadow-sm"
-                title="Close drawer"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPrintModalOrder(selectedOrder)}
+                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-700 hover:bg-slate-100 transition shadow-2xs"
+                  title="Print GST Tax Invoice & Thermal Shipping Slip"
+                >
+                  <Printer className="size-3.5 text-slate-600" />
+                  <span className="hidden xs:inline">Print Slip</span>
+                </button>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shadow-sm"
+                  title="Close drawer"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-6 [webkit-overflow-scrolling:touch]">
+              {/* Return Details Banner if already returned */}
+              {selectedOrder.orderStatus === 'returned' && (
+                <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3 text-xs space-y-1">
+                  <div className="flex items-center gap-2 font-black text-rose-800 uppercase tracking-wider">
+                    <RotateCcw className="size-3.5" />
+                    <span>Order Returned ({selectedOrder.returnType || 'RESTOCK'})</span>
+                  </div>
+                  {selectedOrder.returnReason && (
+                    <p className="text-slate-700 font-medium">Reason: {selectedOrder.returnReason}</p>
+                  )}
+                  {selectedOrder.notes && (
+                    <p className="text-slate-500 text-[11px]">{selectedOrder.notes}</p>
+                  )}
+                </div>
+              )}
+
               {/* Fulfillment Status Control */}
               <div className="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm space-y-2.5 sm:space-y-3">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-2">
@@ -577,14 +714,14 @@ export function OrdersTab() {
                   Click a status to transition the package fulfillment state:
                 </p>
                 <div className="grid grid-cols-2 xs:flex xs:flex-wrap gap-1.5 sm:gap-2 pt-1">
-                  {(['placed', 'processing', 'shipped', 'delivered', 'cancelled'] as const).map((st) => {
+                  {(['placed', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'] as const).map((st) => {
                     const currentId = selectedOrder._id || selectedOrder.orderNumber
                     const isCurrent = selectedOrder.orderStatus === st
                     return (
                       <button
                         key={st}
                         disabled={updatingId === currentId || isCurrent}
-                        onClick={() => handleUpdateStatus(currentId, st)}
+                        onClick={() => handleStatusChangeRequest(selectedOrder, st)}
                         className={`rounded-xl px-3 py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-center transition ${
                           isCurrent
                             ? 'bg-[#080d2d] text-white cursor-default shadow-sm'
@@ -766,6 +903,137 @@ export function OrdersTab() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* INTERACTIVE ORDER RETURN LIFECYCLE MODAL                    */}
+      {/* ============================================================ */}
+      {returnModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center gap-2.5 text-purple-700">
+              <RotateCcw className="h-5 w-5" />
+              <h3 className="text-base font-black uppercase tracking-tight text-[#080d2d]">
+                Process Order Return #{returnModalOrder.orderNumber}
+              </h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Customer: <span className="font-bold text-slate-800">{returnModalOrder.customer?.firstName} {returnModalOrder.customer?.lastName}</span> ({returnModalOrder.customer?.city})
+            </p>
+
+            {/* Line items preview */}
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs space-y-1.5 max-h-32 overflow-y-auto">
+              <p className="text-[10px] font-black uppercase text-slate-400">Returned Items:</p>
+              {returnModalOrder.items?.map((it, idx) => (
+                <div key={idx} className="flex justify-between font-medium text-slate-800">
+                  <span>{it.quantity}x {it.name} {it.size ? `(${it.size})` : ''}</span>
+                  <span className="font-mono">₹{(it.price * it.quantity).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Decision: RESTOCK vs DEFECTIVE */}
+            <div className="mt-4 space-y-2">
+              <label className="text-xs font-bold text-slate-700">Inventory Disposition Decision:</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setReturnType('RESTOCK')}
+                  className={`flex flex-col rounded-xl border p-3 text-left transition ${
+                    returnType === 'RESTOCK'
+                      ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600/20'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-black text-xs text-emerald-800 uppercase">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Restock to Inventory</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-600 leading-tight">
+                    Good Condition / Resellable. Units incremented back to warehouse available stock.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setReturnType('DEFECTIVE')}
+                  className={`flex flex-col rounded-xl border p-3 text-left transition ${
+                    returnType === 'DEFECTIVE'
+                      ? 'border-amber-600 bg-amber-50/70 ring-2 ring-amber-600/20'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-black text-xs text-amber-800 uppercase">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Shift to Defective Piece</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-600 leading-tight">
+                    Damaged / Flawed piece. Units written off to Damaged &amp; Waste ledger; stock stays deducted.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Return Reason Selector */}
+            <div className="mt-4 space-y-2">
+              <label className="text-xs font-bold text-slate-700">Return Reason</label>
+              <select
+                value={returnReason}
+                onChange={(e) => setReturnReason(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-bold text-slate-900 outline-none focus:border-[#080d2d] focus:bg-white"
+              >
+                <option value="Customer size/fit mismatch">Customer size/fit mismatch</option>
+                <option value="Damaged in transit / courier mishandling">Damaged in transit / courier mishandling</option>
+                <option value="Manufacturing flaw / fabric tear">Manufacturing flaw / fabric tear</option>
+                <option value="Customer returned defective unit">Customer returned defective unit</option>
+                <option value="Wrong product or color delivered">Wrong product or color delivered</option>
+                <option value="Customer changed mind / buyer remorse">Customer changed mind / buyer remorse</option>
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div className="mt-3 space-y-1">
+              <label className="text-xs font-bold text-slate-700">Inspection Notes</label>
+              <input
+                type="text"
+                placeholder="e.g. Tags attached, original polybag intact"
+                value={returnNotes}
+                onChange={(e) => setReturnNotes(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-900 outline-none focus:border-[#080d2d] focus:bg-white"
+              />
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+              <button
+                type="button"
+                onClick={() => setReturnModalOrder(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-black text-slate-600 hover:bg-slate-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSubmittingReturn}
+                onClick={handleProcessReturn}
+                className="flex items-center gap-2 rounded-xl bg-[#080d2d] px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-sm hover:bg-slate-800 transition disabled:opacity-50"
+              >
+                {isSubmittingReturn ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                <span>Confirm {returnType === 'RESTOCK' ? 'Restock & Return' : 'Defective Write-Off'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* GST INVOICE & THERMAL SHIPPING SLIP PRINT MODAL             */}
+      {/* ============================================================ */}
+      {printModalOrder && (
+        <PrintShippingInvoiceDialog
+          order={printModalOrder}
+          isOpen={Boolean(printModalOrder)}
+          onClose={() => setPrintModalOrder(null)}
+        />
       )}
     </div>
   )

@@ -2,6 +2,7 @@
 
 import {
   ClipboardList,
+  Barcode,
   SlidersHorizontal,
   Truck,
   AlertTriangle,
@@ -14,6 +15,7 @@ export interface InventoryNavTabsProps {
   subTab: InventorySubTab
   setSubTab: (tab: InventorySubTab) => void
   transactionsCount: number
+  barcodesCount?: number
   purchaseOrdersCount: number
   wasteLogsCount: number
   returnsCount: number
@@ -25,6 +27,7 @@ export function InventoryNavTabs({
   subTab,
   setSubTab,
   transactionsCount,
+  barcodesCount = 0,
   purchaseOrdersCount,
   wasteLogsCount,
   returnsCount,
@@ -44,6 +47,19 @@ export function InventoryNavTabs({
       >
         <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
         <span>Stock Ledger ({transactionsCount})</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setSubTab('barcodes')}
+        className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition ${
+          subTab === 'barcodes'
+            ? 'bg-[#080d2d] text-white shadow-sm'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+        }`}
+      >
+        <Barcode className="h-3.5 w-3.5 text-indigo-500" />
+        <span>Unit Barcodes {barcodesCount > 0 ? `(${barcodesCount})` : ''}</span>
       </button>
 
       <button

@@ -8,6 +8,7 @@ export interface IOrderItem {
   size?: string;
   color?: string;
   image?: string;
+  unitBarcode?: string;
 }
 
 export interface IDeliveryDetails {
@@ -32,7 +33,12 @@ export interface IOrder extends Document {
   grandTotal: number;
   paymentMethod: "card" | "upi" | "cod";
   paymentStatus: "paid" | "pending" | "cod";
-  orderStatus: "placed" | "processing" | "shipped" | "delivered" | "cancelled";
+  orderStatus: "placed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
+  trackingNumber?: string;
+  courier?: string;
+  returnReason?: string;
+  returnType?: "RESTOCK" | "DEFECTIVE";
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +52,7 @@ const OrderItemSchema = new Schema<IOrderItem>(
     size: { type: String },
     color: { type: String },
     image: { type: String },
+    unitBarcode: { type: String },
   },
   { _id: false }
 );
@@ -87,9 +94,14 @@ const OrderSchema = new Schema<IOrder>(
     },
     orderStatus: {
       type: String,
-      enum: ["placed", "processing", "shipped", "delivered", "cancelled"],
+      enum: ["placed", "processing", "shipped", "delivered", "cancelled", "returned"],
       default: "placed",
     },
+    trackingNumber: { type: String, default: "" },
+    courier: { type: String, default: "" },
+    returnReason: { type: String, default: "" },
+    returnType: { type: String, enum: ["RESTOCK", "DEFECTIVE"], default: undefined },
+    notes: { type: String, default: "" },
   },
   { timestamps: true }
 );

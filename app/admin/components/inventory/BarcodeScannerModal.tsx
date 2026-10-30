@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import type { InventoryProduct } from './types'
 
-export type ScannerMode = 'INBOUND' | 'OUTBOUND' | 'LOOKUP'
+export type ScannerMode = 'INBOUND' | 'OUTBOUND' | 'LOOKUP' | 'VERIFY'
 
 export interface BarcodeScannerModalProps {
   isOpen: boolean
@@ -46,14 +46,39 @@ export function BarcodeScannerModal({
     color: string
     stockQuantity: number
   } | null>(null)
-  const [matchedType, setMatchedType] = useState<'SUPPLIER' | 'WAREHOUSE' | 'SKU' | null>(null)
+  const [matchedType, setMatchedType] = useState<'SUPPLIER' | 'WAREHOUSE' | 'SKU' | 'UNIT' | 'ORDER' | null>(null)
   const [actionQty, setActionQty] = useState<number>(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [scanHistory, setScanHistory] = useState<
     { code: string; name: string; time: string; type: string; qty: number }[]
   >([])
 
+  // Dispatch Verification State
+  const [verifyOrder, setVerifyOrder] = useState<any | null>(null)
+  const [verifyUnit, setVerifyUnit] = useState<any | null>(null)
+  const [verifyStatus, setVerifyStatus] = useState<'WAITING_ORDER' | 'WAITING_UNIT' | 'SUCCESS' | 'MISMATCH' | null>('WAITING_ORDER')
+  const [verifyMessage, setVerifyMessage] = useState<string>('')
+
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const playAudioTone = (frequency: number, duration: number) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.frequency.value = frequency
+      osc.start()
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration)
+      setTimeout(() => {
+        osc.stop()
+        ctx.close()
+      }, duration * 1000 + 50)
+    } catch {}
+  }
 
   // Keep input focused automatically for USB hardware wedge scanners
   useEffect(() => {
@@ -67,19 +92,82 @@ export function BarcodeScannerModal({
   if (!isOpen) return null
 
   // Lookup code against supplier barcode, warehouse barcode, SKU, or Product ID
-  const processBarcodeScan = (codeToSearch: string) => {
+  const processBarcodeScan = async (codeToSearch: string) => {
     const raw = codeToSearch.trim()
     if (!raw) return
 
     setLastScannedCode(raw)
     const q = raw.toLowerCase()
 
+    // Handle Dispatch Verification Mode
+    if (scannerMode === 'VERIFY') {
+      if (!verifyOrder) {
+        // Step 1: Scan Order Number
+        try {
+          const res = await fetch(`/api/scan/verify?barcode=${encodeURIComponent(raw)}`)
+          const data = await res.json()
+          if (res.ok && data.type === 'ORDER') {
+            setVerifyOrder(data.data)
+            setVerifyStatus('WAITING_UNIT')
+            setVerifyMessage(`Order #${data.data.orderNumber} loaded. Now scan item unit barcode.`)
+            playAudioTone(880, 0.12)
+          } else {
+            setVerifyStatus('MISMATCH')
+            setVerifyMessage(`Code "${raw}" is not an active order shipping number.`)
+            playAudioTone(220, 0.3)
+          }
+        } catch {
+          setVerifyStatus('MISMATCH')
+          setVerifyMessage(`Failed to look up order "${raw}".`)
+        }
+      } else {
+        // Step 2: Scan Unit Barcode and verify with order items
+        try {
+          const res = await fetch(`/api/scan/verify?barcode=${encodeURIComponent(raw)}`)
+          const data = await res.json()
+          const scannedSku = data.type === 'UNIT_BARCODE' ? data.data.sku : raw
+          const isMatch = verifyOrder.items?.some((it: any) =>
+            it.productId === data.data?.productId ||
+            it.unitBarcode === raw ||
+            (it.sku && it.sku.toLowerCase() === scannedSku.toLowerCase()) ||
+            it.name.toLowerCase().includes(scannedSku.toLowerCase())
+          )
+
+          if (isMatch) {
+            setVerifyUnit(data.data || { barcode: raw })
+            setVerifyStatus('SUCCESS')
+            setVerifyMessage(`MATCH CONFIRMED! Unit #${data.data?.serialNumber || raw} verified for order #${verifyOrder.orderNumber}.`)
+            playAudioTone(880, 0.1)
+            setTimeout(() => playAudioTone(1320, 0.2), 120)
+
+            // Auto-advance order status to shipped
+            await fetch('/api/orders', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: verifyOrder._id || verifyOrder.orderNumber,
+                orderStatus: 'shipped',
+              }),
+            })
+          } else {
+            setVerifyStatus('MISMATCH')
+            setVerifyMessage(`MISMATCH! Unit ${raw} does NOT belong to order #${verifyOrder.orderNumber}.`)
+            playAudioTone(220, 0.35)
+          }
+        } catch {
+          setVerifyStatus('MISMATCH')
+          setVerifyMessage(`Error verifying unit barcode "${raw}".`)
+        }
+      }
+      setScannedInput('')
+      return
+    }
+
     let foundProduct: InventoryProduct | null = null
     let foundVariant: any = null
     let matchSource: 'SUPPLIER' | 'WAREHOUSE' | 'SKU' | null = null
 
     for (const p of products) {
-      // 1. Check Product-level barcodes
       if (p.supplierBarcode && p.supplierBarcode.toLowerCase() === q) {
         foundProduct = p
         matchSource = 'SUPPLIER'
@@ -101,7 +189,6 @@ export function BarcodeScannerModal({
         break
       }
 
-      // 2. Check Variant-level barcodes
       if (p.variants && p.variants.length > 0) {
         for (const v of p.variants) {
           if (v.supplierBarcode && v.supplierBarcode.toLowerCase() === q) {
@@ -127,9 +214,32 @@ export function BarcodeScannerModal({
       }
     }
 
-    setMatchedProduct(foundProduct)
-    setMatchedVariant(foundVariant)
-    setMatchedType(matchSource)
+    if (foundProduct) {
+      setMatchedProduct(foundProduct)
+      setMatchedVariant(foundVariant)
+      setMatchedType(matchSource)
+      playAudioTone(660, 0.08)
+    } else {
+      // Query backend scan verification API
+      try {
+        const res = await fetch(`/api/scan/verify?barcode=${encodeURIComponent(raw)}`)
+        const data = await res.json()
+        if (res.ok && data.success) {
+          if (data.type === 'PRODUCT') {
+            setMatchedProduct(data.data)
+            setMatchedType('SKU')
+          } else if (data.type === 'UNIT_BARCODE') {
+            const prod = products.find((p) => p.id === data.data.productId)
+            if (prod) {
+              setMatchedProduct(prod)
+              setMatchedType('UNIT')
+            }
+          }
+          playAudioTone(660, 0.08)
+        }
+      } catch {}
+    }
+
     setScannedInput('')
   }
 
@@ -211,21 +321,21 @@ export function BarcodeScannerModal({
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <button
             type="button"
             onClick={() => {
               setScannerMode('INBOUND')
               inputRef.current?.focus()
             }}
-            className={`flex items-center justify-center gap-2 rounded-xl p-2.5 text-xs font-black uppercase tracking-wider transition border ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl p-2 text-[11px] font-black uppercase tracking-wider transition border ${
               scannerMode === 'INBOUND'
                 ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-xs'
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
-            <ArrowDownLeft className="h-4 w-4 text-emerald-600" />
-            <span>1. Inbound (Supplier)</span>
+            <ArrowDownLeft className="h-3.5 w-3.5 text-emerald-600" />
+            <span>1. Inbound</span>
           </button>
 
           <button
@@ -234,14 +344,34 @@ export function BarcodeScannerModal({
               setScannerMode('OUTBOUND')
               inputRef.current?.focus()
             }}
-            className={`flex items-center justify-center gap-2 rounded-xl p-2.5 text-xs font-black uppercase tracking-wider transition border ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl p-2 text-[11px] font-black uppercase tracking-wider transition border ${
               scannerMode === 'OUTBOUND'
                 ? 'border-blue-600 bg-blue-50 text-blue-800 shadow-xs'
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
-            <ArrowUpRight className="h-4 w-4 text-blue-600" />
-            <span>2. Outbound (Ship)</span>
+            <ArrowUpRight className="h-3.5 w-3.5 text-blue-600" />
+            <span>2. Outbound</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setScannerMode('VERIFY')
+              setVerifyOrder(null)
+              setVerifyUnit(null)
+              setVerifyStatus('WAITING_ORDER')
+              setVerifyMessage('Scan order shipping barcode or enter order ID')
+              inputRef.current?.focus()
+            }}
+            className={`flex items-center justify-center gap-1.5 rounded-xl p-2 text-[11px] font-black uppercase tracking-wider transition border ${
+              scannerMode === 'VERIFY'
+                ? 'border-purple-600 bg-purple-50 text-purple-800 shadow-xs'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
+            <span>3. POS Verify</span>
           </button>
 
           <button
@@ -250,16 +380,42 @@ export function BarcodeScannerModal({
               setScannerMode('LOOKUP')
               inputRef.current?.focus()
             }}
-            className={`flex items-center justify-center gap-2 rounded-xl p-2.5 text-xs font-black uppercase tracking-wider transition border ${
+            className={`flex items-center justify-center gap-1.5 rounded-xl p-2 text-[11px] font-black uppercase tracking-wider transition border ${
               scannerMode === 'LOOKUP'
                 ? 'border-[#080d2d] bg-[#080d2d] text-white shadow-xs'
                 : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
             }`}
           >
-            <Barcode className="h-4 w-4" />
-            <span>Quick Lookup</span>
+            <Barcode className="h-3.5 w-3.5" />
+            <span>Lookup</span>
           </button>
         </div>
+
+        {/* Dispatch Verification Banner when in VERIFY mode */}
+        {scannerMode === 'VERIFY' && (
+          <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-3 text-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-black uppercase text-purple-900 tracking-wider">
+                {verifyOrder ? `Order #${verifyOrder.orderNumber}` : 'Step 1: Scan Order Barcode'}
+              </span>
+              <span className="font-bold text-[10px] text-purple-700">
+                {verifyStatus === 'SUCCESS' ? 'VERIFIED ✓' : verifyStatus === 'MISMATCH' ? 'ERROR ✗' : 'PENDING SCAN'}
+              </span>
+            </div>
+            <p className="text-slate-600 font-medium text-[11px]">{verifyMessage}</p>
+
+            {verifyOrder && (
+              <div className="mt-2 space-y-1 rounded-lg border border-purple-100 bg-white p-2">
+                <p className="font-bold text-slate-800">
+                  {verifyOrder.customer?.firstName} {verifyOrder.customer?.lastName} ({verifyOrder.customer?.city})
+                </p>
+                <div className="text-[10px] text-slate-500">
+                  Expected items: {verifyOrder.items?.map((it: any) => `${it.quantity}x ${it.name}`).join(', ')}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Hardware Wedge Scanner Input Box */}
         <div className="relative">
