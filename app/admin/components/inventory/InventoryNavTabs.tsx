@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Layers,
+  Globe,
 } from 'lucide-react'
 import type { InventorySubTab } from './types'
 
@@ -38,15 +39,18 @@ export function InventoryNavTabs({
     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 border-b border-slate-200 pb-2">
       <button
         type="button"
-        onClick={() => setSubTab('ledger')}
+        onClick={() => {
+          if (onOpenAdjustTab) onOpenAdjustTab()
+          setSubTab('adjust-stock')
+        }}
         className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition ${
-          subTab === 'ledger'
+          subTab === 'adjust-stock'
             ? 'bg-[#080d2d] text-white shadow-sm'
             : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
         }`}
       >
-        <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
-        <span>Stock Ledger ({transactionsCount})</span>
+        <SlidersHorizontal className="h-3.5 w-3.5 text-blue-400" />
+        <span>Warehouse Stock</span>
       </button>
 
       <button
@@ -64,18 +68,15 @@ export function InventoryNavTabs({
 
       <button
         type="button"
-        onClick={() => {
-          if (onOpenAdjustTab) onOpenAdjustTab()
-          setSubTab('adjust-stock')
-        }}
+        onClick={() => setSubTab('ledger')}
         className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition ${
-          subTab === 'adjust-stock'
+          subTab === 'ledger'
             ? 'bg-[#080d2d] text-white shadow-sm'
             : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
         }`}
       >
-        <SlidersHorizontal className="h-3.5 w-3.5 text-blue-400" />
-        <span>Adjust Stock</span>
+        <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
+        <span>Stock Ledger ({transactionsCount})</span>
       </button>
 
       <button
@@ -128,6 +129,19 @@ export function InventoryNavTabs({
       >
         <Layers className="h-3.5 w-3.5 text-cyan-500" />
         <span>Suppliers ({suppliersCount})</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setSubTab('marketplaces')}
+        className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-black uppercase tracking-wider transition ${
+          subTab === 'marketplaces'
+            ? 'bg-[#080d2d] text-white shadow-sm'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+        }`}
+      >
+        <Globe className="h-3.5 w-3.5 text-amber-500" />
+        <span>Marketplaces (Amazon / Flipkart)</span>
       </button>
     </div>
   )

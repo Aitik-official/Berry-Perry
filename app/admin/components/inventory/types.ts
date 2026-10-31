@@ -3,13 +3,14 @@ import type { Product, ProductVariantItem } from '@/lib/products-data'
 export type { ProductVariantItem }
 
 export type InventorySubTab =
-  | 'ledger'
-  | 'barcodes'
   | 'adjust-stock'
+  | 'barcodes'
+  | 'ledger'
   | 'po'
   | 'waste'
   | 'returns'
   | 'suppliers'
+  | 'marketplaces'
 
 export type InventoryProduct = Product & {
   sku?: string

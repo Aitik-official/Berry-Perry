@@ -1,4 +1,4 @@
-import { Package, Truck, ClipboardList, AlertTriangle, Layers } from 'lucide-react'
+import { Package, Truck, ClipboardList, AlertTriangle, Layers, Barcode, Globe } from 'lucide-react'
 
 export interface InventoryStatsBarProps {
   totalStockUnits: number
@@ -6,6 +6,8 @@ export interface InventoryStatsBarProps {
   transactionsCount: number
   wasteLogsCount: number
   suppliersCount: number
+  barcodesCount?: number
+  marketplacesCount?: number
 }
 
 export function InventoryStatsBar({
@@ -14,9 +16,11 @@ export function InventoryStatsBar({
   transactionsCount,
   wasteLogsCount,
   suppliersCount,
+  barcodesCount = 0,
+  marketplacesCount = 2,
 }: InventoryStatsBarProps) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-4 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-3 lg:grid-cols-6">
       <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
         <div className="flex items-center justify-between text-slate-500">
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total Units</span>
@@ -24,6 +28,15 @@ export function InventoryStatsBar({
         </div>
         <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#080d2d]">{totalStockUnits}</p>
         <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Warehouse Count</span>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+        <div className="flex items-center justify-between text-slate-500">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Unit Serials</span>
+          <Barcode className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-600" />
+        </div>
+        <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-indigo-600">{barcodesCount}</p>
+        <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Active Barcodes</span>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
@@ -53,13 +66,13 @@ export function InventoryStatsBar({
         <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Scrap Logged</span>
       </div>
 
-      <div className="col-span-2 sm:col-span-4 lg:col-span-1 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
         <div className="flex items-center justify-between text-slate-500">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Suppliers</span>
-          <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-600" />
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Marketplaces</span>
+          <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
         </div>
-        <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-[#080d2d]">{suppliersCount}</p>
-        <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Active Vendors</span>
+        <p className="mt-1 sm:mt-2 text-xl sm:text-2xl font-black text-amber-600">{marketplacesCount} Channels</p>
+        <span className="text-[10px] sm:text-[11px] font-medium text-slate-400">Amazon &amp; Flipkart</span>
       </div>
     </div>
   )

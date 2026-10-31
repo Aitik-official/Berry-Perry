@@ -28,8 +28,8 @@ export function AdminHeader({
         <div className="min-w-0">
           <h1 className="text-xs sm:text-base font-black uppercase tracking-tight text-[#1A1A1A] truncate">
             {activeTab === 'orders' && 'Customer Orders'}
-            {activeTab === 'inventory' && 'Inventory & Products'}
-            {activeTab === 'inventory-management' && 'Inventory Management'}
+            {activeTab === 'inventory' && 'Product Catalog & Merchandising'}
+            {activeTab === 'inventory-management' && 'Warehouse & Inventory Hub'}
             {activeTab === 'media' && 'Homepage Media CMS'}
             {activeTab === 'taxonomy' && 'Store Taxonomies'}
             {activeTab === 'settings' && 'System Architecture'}
@@ -38,9 +38,9 @@ export function AdminHeader({
             {activeTab === 'orders' &&
               'Review incoming orders, view shipping addresses, initiate WhatsApp/email, and manage fulfillment.'}
             {activeTab === 'inventory' &&
-              'Easily add and edit products with visual color pickers, size checkboxes, and galleries.'}
+              'Manage storefront visual catalog: photos, descriptions, swatches, sizing, and pricing.'}
             {activeTab === 'inventory-management' &&
-              'Track warehouse stock ledger, manage purchase orders, record scrap waste, process returns, and manage suppliers.'}
+              'Enterprise warehouse operations: unit barcode labels, stock balances, double-entry audit ledger, POs, defect scrap, returns, and Amazon/Flipkart feeds.'}
             {activeTab === 'media' && 'Replace or update images and videos visually without complex URL strings.'}
             {activeTab === 'taxonomy' &&
               'Add and manage categories, promotional tags, sports, sizes, announcement ticker, and contact details.'}

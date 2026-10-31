@@ -2,6 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import {
+  Scan,
+  Barcode,
+  SlidersHorizontal,
+  Truck,
+  AlertTriangle,
+  RotateCcw,
+  Globe,
+  Zap,
+} from 'lucide-react'
+import {
   defaultSuppliers,
   defaultPurchaseOrders,
   defaultTransactions,
@@ -26,6 +36,7 @@ import {
   InventoryWasteSubtab,
   InventoryReturnsSubtab,
   InventorySuppliersSubtab,
+  InventoryMarketplacesSubtab,
   AdjustStockModal,
   CreatePOModal,
   RecordWasteModal,
@@ -41,7 +52,7 @@ export function InventoryManagementTab({
   products,
   triggerToast,
 }: InventoryManagementTabProps) {
-  const [subTab, setSubTab] = useState<InventorySubTab>('ledger')
+  const [subTab, setSubTab] = useState<InventorySubTab>('adjust-stock')
 
   // Live datasets
   const [transactions, setTransactions] = useState<InventoryTransactionItem[]>(defaultTransactions)
@@ -49,6 +60,7 @@ export function InventoryManagementTab({
   const [wasteLogs, setWasteLogs] = useState<DamageWasteItem[]>(defaultDamageWaste)
   const [returnsList, setReturnsList] = useState<OrderReturnItem[]>(defaultOrderReturns)
   const [suppliersList, setSuppliersList] = useState<SupplierItem[]>(defaultSuppliers)
+  const [barcodesCount, setBarcodesCount] = useState<number>(0)
 
   // Adjust Stock Modal State
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false)
@@ -117,12 +129,13 @@ export function InventoryManagementTab({
   useEffect(() => {
     async function fetchData() {
       try {
-        const [txnRes, poRes, wasteRes, retRes, supRes] = await Promise.all([
+        const [txnRes, poRes, wasteRes, retRes, supRes, barRes] = await Promise.all([
           fetch('/api/inventory/transactions').catch(() => null),
           fetch('/api/inventory/po').catch(() => null),
           fetch('/api/inventory/waste').catch(() => null),
           fetch('/api/returns').catch(() => null),
           fetch('/api/inventory/suppliers').catch(() => null),
+          fetch('/api/barcodes?limit=1').catch(() => null),
         ])
 
         if (txnRes && txnRes.ok) {
@@ -144,6 +157,10 @@ export function InventoryManagementTab({
         if (supRes && supRes.ok) {
           const data = await supRes.json()
           if (data.suppliers) setSuppliersList(data.suppliers)
+        }
+        if (barRes && barRes.ok) {
+          const data = await barRes.json()
+          if (typeof data.total === 'number') setBarcodesCount(data.total)
         }
       } catch (err) {
         console.warn('Failed to load inventory records:', err)
@@ -507,13 +524,100 @@ export function InventoryManagementTab({
         transactionsCount={transactions.length}
         wasteLogsCount={wasteLogs.length}
         suppliersCount={suppliersList.length}
+        barcodesCount={barcodesCount}
+        marketplacesCount={2}
       />
+
+      {/* 1.1 RAPID OPERATIONS COMMAND BAR */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#080d2d] text-white shadow-2xs shrink-0">
+              <Zap className="h-4 w-4 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black uppercase tracking-tight text-[#080d2d]">
+                Operations Command Center
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                1-click triggers for barcode scanning, batch serials, PO intake, returns &amp; live marketplace feeds
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsScannerModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-black uppercase tracking-wider text-white shadow-sm transition active:scale-95"
+            >
+              <Scan className="h-3.5 w-3.5 text-blue-200" />
+              <span>POS Barcode Gun</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSubTab('barcodes')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 text-xs font-black uppercase tracking-wider text-indigo-900 transition active:scale-95"
+            >
+              <Barcode className="h-3.5 w-3.5 text-indigo-600" />
+              <span>Generate Serials</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openAdjustModalWithProduct()}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2 text-xs font-black uppercase tracking-wider text-slate-700 transition active:scale-95"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-slate-500" />
+              <span>Adjust Stock</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsPOModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 px-3 py-2 text-xs font-black uppercase tracking-wider text-emerald-800 transition active:scale-95"
+            >
+              <Truck className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Create PO</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsWasteModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 px-3 py-2 text-xs font-black uppercase tracking-wider text-rose-800 transition active:scale-95"
+            >
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />
+              <span>Scrap Defect</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsReturnModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 px-3 py-2 text-xs font-black uppercase tracking-wider text-purple-800 transition active:scale-95"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-purple-600" />
+              <span>Intake Return</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSubTab('marketplaces')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 px-3 py-2 text-xs font-black uppercase tracking-wider text-amber-800 transition active:scale-95"
+            >
+              <Globe className="h-3.5 w-3.5 text-amber-600" />
+              <span>Marketplaces</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* 2. SUBTAB NAVIGATION PILLS */}
       <InventoryNavTabs
         subTab={subTab}
         setSubTab={setSubTab}
         transactionsCount={transactions.length}
+        barcodesCount={barcodesCount}
         purchaseOrdersCount={purchaseOrders.length}
         wasteLogsCount={wasteLogs.length}
         returnsCount={returnsList.length}
@@ -600,6 +704,14 @@ export function InventoryManagementTab({
             setPOSupplierId(supplierId)
             setIsPOModalOpen(true)
           }}
+        />
+      )}
+
+      {/* 9. SUBTAB: MARKETPLACES (AMAZON / FLIPKART LIVE FEEDS) */}
+      {subTab === 'marketplaces' && (
+        <InventoryMarketplacesSubtab
+          products={products}
+          triggerToast={showToast}
         />
       )}
 

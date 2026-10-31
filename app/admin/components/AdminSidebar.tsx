@@ -100,7 +100,7 @@ export function AdminSidebar({
             </span>
           </button>
 
-          {/* Module 1: Inventory & Products (Existing unmodified) */}
+          {/* Module 1: Product Catalog & Merchandising */}
           <button
             type="button"
             onClick={() => {
@@ -115,7 +115,7 @@ export function AdminSidebar({
           >
             <div className="flex items-center gap-3">
               <Package className="h-4 w-4" />
-              <span>Inventory &amp; Products</span>
+              <span>Product Catalog</span>
             </div>
             <span
               className={`rounded-full px-1.5 py-0.2 text-[10px] font-black ${
@@ -126,7 +126,7 @@ export function AdminSidebar({
             </span>
           </button>
 
-          {/* Module 1.5: Inventory Management (Dedicated module) */}
+          {/* Module 1.5: Warehouse & Inventory Operations Hub */}
           <button
             type="button"
             onClick={() => {
@@ -141,7 +141,7 @@ export function AdminSidebar({
           >
             <div className="flex items-center gap-3">
               <Truck className="h-4 w-4 text-[#5CB946]" />
-              <span>Inventory Management</span>
+              <span>Warehouse &amp; Inventory</span>
             </div>
             <span
               className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
@@ -150,7 +150,7 @@ export function AdminSidebar({
                   : 'bg-emerald-100 text-emerald-700'
               }`}
             >
-              Operations
+              Enterprise
             </span>
           </button>
 

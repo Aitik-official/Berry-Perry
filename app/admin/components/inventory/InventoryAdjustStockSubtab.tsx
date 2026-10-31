@@ -11,6 +11,7 @@ import {
   Printer,
   Scan,
   Barcode,
+  Globe,
 } from 'lucide-react'
 import type { InventoryProduct, InventorySubTab } from './types'
 
@@ -182,6 +183,26 @@ export function InventoryAdjustStockSubtab({
 
             <button
               type="button"
+              onClick={() => setSubTab('barcodes')}
+              className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-900 hover:bg-indigo-100 transition shrink-0 shadow-xs"
+              title="View and generate serialized unit barcodes"
+            >
+              <Barcode className="h-3.5 w-3.5 text-indigo-600" />
+              <span>Serials</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSubTab('marketplaces')}
+              className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 transition shrink-0 shadow-xs"
+              title="Open Amazon & Flipkart sync hub"
+            >
+              <Globe className="h-3.5 w-3.5 text-amber-600" />
+              <span>Marketplaces</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setSubTab('ledger')}
               className="flex items-center gap-1.5 rounded-lg bg-[#080d2d] px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-800 transition shrink-0"
             >
@@ -278,6 +299,24 @@ export function InventoryAdjustStockSubtab({
                         />
                         {currentStock > 0 ? 'In Stock' : 'Out'}
                       </span>
+
+                      <button
+                        type="button"
+                        onClick={() => setSubTab('barcodes')}
+                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition"
+                        title={`View Unit Barcodes: ${product.name}`}
+                      >
+                        <Barcode className="h-3.5 w-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSubTab('marketplaces')}
+                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-amber-600 transition"
+                        title={`Amazon / Flipkart Sync: ${product.name}`}
+                      >
+                        <Globe className="h-3.5 w-3.5" />
+                      </button>
 
                       <button
                         type="button"
@@ -532,6 +571,22 @@ export function InventoryAdjustStockSubtab({
                       {/* Actions column */}
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setSubTab('barcodes')}
+                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 hover:border-slate-300 transition shadow-xs"
+                            title={`Serialized Unit Barcodes: ${product.name}`}
+                          >
+                            <Barcode className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSubTab('marketplaces')}
+                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-amber-600 hover:border-slate-300 transition shadow-xs"
+                            title={`Amazon / Flipkart Stock Feed: ${product.name}`}
+                          >
+                            <Globe className="h-4 w-4" />
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
