@@ -242,7 +242,7 @@ export function InventoryAdjustStockSubtab({
         </div>
       </div>
 
-      {/* 5. VIEW A: PRODUCT CARDS VIEW (SIGNATURE DARK CARDS MATCHING SCREENSHOT) */}
+      {/* 5. VIEW A: PRODUCT CARDS VIEW (CLEAN LIGHT THEMED CARDS) */}
       {viewMode === 'cards' && (
         <div className="space-y-4">
           {paginatedProducts.length === 0 ? (
@@ -261,12 +261,12 @@ export function InventoryAdjustStockSubtab({
                 return (
                   <div
                     key={product.id}
-                    className="rounded-2xl border border-slate-800 bg-[#080d2d] text-white p-5 shadow-lg flex flex-col justify-between hover:border-slate-600 transition duration-200"
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between hover:shadow-md hover:border-slate-300 transition duration-200"
                   >
                     <div>
                       {/* Top Header: Category & Name */}
                       <div className="flex items-start gap-3.5">
-                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-slate-700 bg-slate-800/80 flex items-center justify-center">
+                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-center">
                           {product.image ? (
                             <Image
                               src={product.image}
@@ -282,28 +282,28 @@ export function InventoryAdjustStockSubtab({
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <span className="inline-block rounded bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-pink-300 border border-white/15 mb-1">
+                          <span className="inline-block rounded bg-pink-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#EB008B] border border-pink-200/60 mb-1">
                             {product.mainCategory || product.category.replace(/-/g, ' ')}
                           </span>
-                          <h4 className="font-black text-xs sm:text-sm uppercase tracking-tight text-white line-clamp-2">
+                          <h4 className="font-black text-xs sm:text-sm uppercase tracking-tight text-[#080d2d] line-clamp-2">
                             {product.name}
                           </h4>
                         </div>
                       </div>
 
                       {/* Website Status Row */}
-                      <div className="mt-3.5 flex items-center justify-between border-t border-slate-800/80 pt-2.5 text-xs text-slate-300">
+                      <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs text-slate-500">
                         <span className="text-[11px] text-slate-400">Website:</span>
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Live
                           </span>
                           <span
                             className={`rounded px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${
                               currentStock > 0
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
                             }`}
                           >
                             {currentStock > 0 ? `${currentStock} In Stock` : 'Out of Stock'}
@@ -311,13 +311,13 @@ export function InventoryAdjustStockSubtab({
                         </div>
                       </div>
 
-                      {/* 2-Column Metrics Box (Matching Screenshot) */}
-                      <div className="mt-3.5 grid grid-cols-2 gap-2.5 rounded-xl bg-slate-900/90 border border-slate-800 p-3">
+                      {/* 2-Column Metrics Box */}
+                      <div className="mt-3.5 grid grid-cols-2 gap-2.5 rounded-xl bg-slate-50 border border-slate-200/80 p-3">
                         <div>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                             Offer Price
                           </span>
-                          <p className="mt-0.5 text-base sm:text-lg font-black text-white font-mono">
+                          <p className="mt-0.5 text-base sm:text-lg font-black text-[#080d2d] font-mono">
                             ₹{product.price}
                           </p>
                         </div>
@@ -325,32 +325,32 @@ export function InventoryAdjustStockSubtab({
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                             In Stock
                           </span>
-                          <p className="mt-0.5 text-base sm:text-lg font-black text-emerald-400 font-mono">
-                            {currentStock} <span className="text-xs font-normal text-slate-300">Units</span>
+                          <p className="mt-0.5 text-base sm:text-lg font-black text-emerald-600 font-mono">
+                            {currentStock} <span className="text-xs font-normal text-slate-500">Units</span>
                           </p>
                           <span className="text-[9px] text-slate-400 block font-medium">Per-Unit Serialized</span>
                         </div>
                       </div>
 
                       {/* SKU & Barcode Tag */}
-                      <div className="mt-3.5 space-y-1 text-[11px] font-mono text-slate-400">
+                      <div className="mt-3.5 space-y-1 text-[11px] font-mono text-slate-500">
                         <div className="flex justify-between">
                           <span>SKU Code:</span>
-                          <span className="font-bold text-slate-200">{skuCode}</span>
+                          <span className="font-bold text-[#080d2d]">{skuCode}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Barcode Tag:</span>
-                          <span className="font-bold text-slate-300 truncate max-w-[140px]">{barcodeTag}</span>
+                          <span className="font-bold text-slate-600 truncate max-w-[140px]">{barcodeTag}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Card Action Footer (Matching Screenshot) */}
-                    <div className="mt-4 flex items-center gap-2 border-t border-slate-800 pt-3">
+                    {/* Card Action Footer */}
+                    <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3">
                       <button
                         type="button"
                         onClick={() => onOpenAdjustModal(product, 'RECEIVE', 10, 'Stock refill addition')}
-                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#5CB946] hover:bg-emerald-600 px-3 py-2 text-xs font-black uppercase tracking-wider text-white transition active:scale-95 shadow-sm"
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#5CB946] hover:bg-emerald-600 px-3 py-2 text-xs font-black uppercase tracking-wider text-white transition active:scale-95 shadow-xs"
                       >
                         <Zap className="h-3.5 w-3.5" />
                         <span>Refill (+10)</span>
@@ -359,7 +359,7 @@ export function InventoryAdjustStockSubtab({
                       <button
                         type="button"
                         onClick={() => onOpenAdjustModal(product, 'ADJUST', 10, 'Physical cycle-count audit')}
-                        className="flex items-center gap-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-2 text-xs font-bold text-white transition"
+                        className="flex items-center gap-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:text-[#080d2d] transition"
                         title="View details & audit"
                       >
                         <span>Details</span>
@@ -371,7 +371,7 @@ export function InventoryAdjustStockSubtab({
                         onClick={() => {
                           if (onOpenPrintBarcode) onOpenPrintBarcode(product)
                         }}
-                        className="rounded-xl border border-slate-700 bg-white/5 p-2 text-slate-400 hover:text-white hover:bg-white/10 transition"
+                        className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-500 hover:text-[#080d2d] hover:bg-slate-100 transition"
                         title="Print Barcode Thermal Label"
                       >
                         <Printer className="h-3.5 w-3.5" />
