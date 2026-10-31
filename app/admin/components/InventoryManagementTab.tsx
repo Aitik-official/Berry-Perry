@@ -530,6 +530,7 @@ export function InventoryManagementTab({
         <InventoryBarcodesSubtab
           products={products}
           triggerToast={showToast}
+          onBarcodesUpdated={(count) => setBarcodesCount(count)}
           onOpenPrintModal={(product) => {
             setBarcodeTargetProduct(product)
             setIsPrintBarcodeModalOpen(true)

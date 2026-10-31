@@ -41,11 +41,13 @@ export interface InventoryBarcodesSubtabProps {
   products: InventoryProduct[]
   triggerToast?: (msg: string) => void
   onOpenPrintModal?: (product: InventoryProduct) => void
+  onBarcodesUpdated?: (count: number) => void
 }
 
 export function InventoryBarcodesSubtab({
   products,
   triggerToast,
+  onBarcodesUpdated,
 }: InventoryBarcodesSubtabProps) {
   const [barcodes, setBarcodes] = useState<UnitBarcodeItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -75,6 +77,13 @@ export function InventoryBarcodesSubtab({
   const [genBatch, setGenBatch] = useState(`BATCH-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}`)
   const [isGenerating, setIsGenerating] = useState(false)
 
+  // Sync genProductId if products load asynchronously
+  useEffect(() => {
+    if (!genProductId && products.length > 0) {
+      setGenProductId(products[0].id)
+    }
+  }, [products, genProductId])
+
   // Defective modal
   const [defectiveTarget, setDefectiveTarget] = useState<UnitBarcodeItem | null>(null)
   const [defectReason, setDefectReason] = useState('Damaged in transit / handling')
@@ -99,6 +108,9 @@ export function InventoryBarcodesSubtab({
       if (cached) {
         setBarcodes(cached.barcodes)
         setStats(cached.stats)
+        if (onBarcodesUpdated && typeof cached.stats?.TOTAL === 'number') {
+          onBarcodesUpdated(cached.stats.TOTAL)
+        }
         setIsLoading(false)
       } else {
         setIsLoading(true)
@@ -111,7 +123,12 @@ export function InventoryBarcodesSubtab({
       const data = await res.json()
       if (res.ok && data.barcodes) {
         setBarcodes(data.barcodes)
-        if (data.stats) setStats(data.stats)
+        if (data.stats) {
+          setStats(data.stats)
+          if (onBarcodesUpdated && typeof data.stats.TOTAL === 'number') {
+            onBarcodesUpdated(data.stats.TOTAL)
+          }
+        }
         setSessionCache('barcodes_registry_list', { barcodes: data.barcodes, stats: data.stats })
       }
     } catch (err) {
