@@ -115,54 +115,59 @@ export function InventoryAdjustStockSubtab({
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      {/* 1. TOP HEADER & HIERARCHY BANNER (MATCHING SCREENSHOT) */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#080d2d] text-white shadow-md shadow-[#080d2d]/20 shrink-0">
-              <Package className="h-6 w-6 text-pink-400" />
+      {/* UNIFIED COMPACT HEADER & CONTROLS */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm space-y-3.5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#080d2d] text-white shadow-sm shrink-0">
+              <Package className="h-5 w-5 text-pink-400" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#080d2d]">
+              <h2 className="text-sm sm:text-base font-black uppercase tracking-tight text-[#080d2d]">
                 Products &amp; Warehouse Hierarchy
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Manage master catalog products, physical stock levels, SKUs, and per-unit serial barcodes.
+              <p className="text-xs text-slate-500">
+                {products.length} Products Catalog • {inStockCount} In Stock • {outOfStockCount} Out of Stock
               </p>
             </div>
           </div>
 
-          {/* Action buttons on right */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800">
-              <Globe className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Website Listed ({products.length})</span>
-              <span className="rounded bg-emerald-200/60 px-1.5 py-0.2 text-[10px] font-black text-emerald-900">
-                {inStockCount} in stock
-              </span>
+          <div className="flex items-center gap-2">
+            {/* View switcher: Cards vs Table */}
+            <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setViewMode('cards')
+                  setPageSize(9)
+                  setCurrentPage(1)
+                }}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                  viewMode === 'cards'
+                    ? 'bg-[#080d2d] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span>Cards</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setViewMode('table')
+                  setPageSize(10)
+                  setCurrentPage(1)
+                }}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                  viewMode === 'table'
+                    ? 'bg-[#080d2d] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <List className="h-3.5 w-3.5" />
+                <span>Table</span>
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (products.length > 0) {
-                  onOpenAdjustModal(products[0], 'RECEIVE', 10, 'Bulk replenishment intake')
-                }
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#5CB946] hover:bg-emerald-600 px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-sm transition active:scale-95"
-            >
-              <Zap className="h-3.5 w-3.5" />
-              <span>Bulk Refill</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSubTab('po')}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 transition active:scale-95 shadow-2xs"
-            >
-              <Truck className="h-3.5 w-3.5 text-slate-500" />
-              <span>Create PO</span>
-            </button>
 
             <button
               type="button"
@@ -179,104 +184,19 @@ export function InventoryAdjustStockSubtab({
           </div>
         </div>
 
-        {/* 2. SUB-NAVIGATION PILLS (MATCHING SCREENSHOT) */}
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-          <button
-            type="button"
-            onClick={() => {
-              setViewMode('cards')
-              setPageSize(9)
-              setCurrentPage(1)
-            }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition ${
-              viewMode === 'cards'
-                ? 'bg-[#080d2d] text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <LayoutGrid className="h-3.5 w-3.5 text-pink-400" />
-            <span>Product Cards ({filteredAdjustProducts.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setViewMode('table')
-              setPageSize(10)
-              setCurrentPage(1)
-            }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition ${
-              viewMode === 'table'
-                ? 'bg-[#080d2d] text-white shadow-sm'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            <List className="h-3.5 w-3.5 text-blue-400" />
-            <span>Data Table ({filteredAdjustProducts.length})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSubTab('barcodes')}
-            className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
-          >
-            <Barcode className="h-3.5 w-3.5 text-indigo-500" />
-            <span>Unit Barcodes</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSubTab('ledger')}
-            className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
-          >
-            <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
-            <span>Stock Ledger</span>
-          </button>
-        </div>
-
-        {/* 3. STOREFRONT STATUS NOTIFICATION BANNER (MATCHING SCREENSHOT) */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-blue-200/80 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 p-3.5 text-xs text-slate-700">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-2xs shrink-0">
-              <Globe className="h-4 w-4" />
-            </span>
-            <div>
-              <span className="font-bold text-[#080d2d]">Storefront Status:</span>{' '}
-              <span className="font-semibold text-slate-600">
-                {products.length} Products Visible • {inStockCount} Ready to Ship •{' '}
-                <span className="text-rose-600 font-bold">{outOfStockCount} Out of Stock</span>
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setViewMode(viewMode === 'cards' ? 'table' : 'cards')
-              setCurrentPage(1)
-            }}
-            className="inline-flex items-center gap-1 font-bold text-blue-700 hover:text-blue-900 transition self-start sm:self-auto shrink-0"
-          >
-            <span>{viewMode === 'cards' ? 'Switch to Data Table' : 'Switch to Product Cards'}</span>
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* 4. SEARCH & FILTER BAR */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
-        <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center lg:justify-between">
+        {/* Filter inputs in the same card */}
+        <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center lg:justify-between border-t border-slate-100 pt-3.5">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search products by title, SKU, brand, category, or sport..."
+              placeholder="Search products by title, SKU, brand, category..."
               value={adjustSearch}
               onChange={(e) => {
                 setAdjustSearch(e.target.value)
                 setCurrentPage(1)
               }}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-xs font-medium text-[#080d2d] outline-none transition focus:border-[#EB008B] focus:bg-white"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-xs font-medium text-[#080d2d] outline-none transition focus:border-[#EB008B] focus:bg-white"
             />
           </div>
 
@@ -289,7 +209,7 @@ export function InventoryAdjustStockSubtab({
               }}
               className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
             >
-              <option value="all">Website: All Categories ({products.length})</option>
+              <option value="all">Category: All ({products.length})</option>
               {Array.from(new Set(products.map((p) => p.category))).map((cat) => (
                 <option key={cat} value={cat}>
                   {cat.replace(/-/g, ' ')}
@@ -305,9 +225,9 @@ export function InventoryAdjustStockSubtab({
               }}
               className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
             >
-              <option value="all">Stock: All Statuses</option>
-              <option value="in_stock">In Stock Only ({inStockCount})</option>
-              <option value="out_of_stock">Out of Stock Only ({outOfStockCount})</option>
+              <option value="all">Stock: All</option>
+              <option value="in_stock">In Stock ({inStockCount})</option>
+              <option value="out_of_stock">Out of Stock ({outOfStockCount})</option>
             </select>
 
             <button
@@ -317,18 +237,6 @@ export function InventoryAdjustStockSubtab({
               className="flex items-center justify-center rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 transition shrink-0"
             >
               <RotateCcw className="h-4 w-4" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenScanner) onOpenScanner()
-              }}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-700 transition shrink-0 shadow-xs"
-              title="Open Barcode Scanner (Inbound & Outbound)"
-            >
-              <Scan className="h-3.5 w-3.5" />
-              <span>Scan Barcode</span>
             </button>
           </div>
         </div>
