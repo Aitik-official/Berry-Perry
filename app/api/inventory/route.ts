@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb'
 import Product from '@/models/Product'
 import InventoryTransaction from '@/models/InventoryTransaction'
 import { verifyAdminAuth, unauthorizedResponse } from '@/lib/admin-auth'
+import { findProductDocument } from '@/lib/products-server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -51,9 +52,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required inventory adjustment fields' }, { status: 400 })
     }
 
-    const product = await Product.findOne({
-      $or: [{ id: productId }, { _id: productId }],
-    })
+    const product = await findProductDocument(productId)
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })

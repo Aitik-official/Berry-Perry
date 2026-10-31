@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { verifyAdminAuth, unauthorizedResponse } from "@/lib/admin-auth";
+import { findProductDocument } from "@/lib/products-server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,9 +17,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { productId, sku } = body;
 
-    const product = await Product.findOne({
-      $or: [{ id: productId }, { _id: productId }, { sku }].filter(Boolean),
-    });
+    let product = productId ? await findProductDocument(productId) : null;
+    if (!product && sku) {
+      product = await Product.findOne({ sku });
+    }
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });

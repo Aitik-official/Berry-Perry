@@ -5,6 +5,7 @@ import Product from '@/models/Product'
 import InventoryTransaction from '@/models/InventoryTransaction'
 import { defaultPurchaseOrders } from '@/lib/inventory-data'
 import { verifyAdminAuth, unauthorizedResponse } from '@/lib/admin-auth'
+import { findProductDocument } from '@/lib/products-server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -128,9 +129,7 @@ export async function PUT(req: NextRequest) {
       await targetPO.save()
 
       for (const item of targetPO.items) {
-        const product = await Product.findOne({
-          $or: [{ id: item.productId }, { _id: item.productId }],
-        })
+        const product = await findProductDocument(item.productId)
         if (product) {
           const currentStock = typeof product.stockQuantity === 'number' ? product.stockQuantity : 25
           const newStock = currentStock + item.quantity

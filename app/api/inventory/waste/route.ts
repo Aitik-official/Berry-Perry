@@ -5,6 +5,7 @@ import Product from '@/models/Product'
 import InventoryTransaction from '@/models/InventoryTransaction'
 import { defaultDamageWaste } from '@/lib/inventory-data'
 import { verifyAdminAuth, unauthorizedResponse } from '@/lib/admin-auth'
+import { findProductDocument } from '@/lib/products-server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -71,9 +72,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid product or scrap quantity' }, { status: 400 })
     }
 
-    const product = await Product.findOne({
-      $or: [{ id: productId }, { _id: productId }],
-    })
+    const product = await findProductDocument(productId)
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })

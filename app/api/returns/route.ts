@@ -7,6 +7,7 @@ import Waste from '@/models/Waste'
 import Order from '@/models/Order'
 import { defaultOrderReturns, type OrderReturnItem } from '@/lib/inventory-data'
 import { verifyAdminAuth, unauthorizedResponse } from '@/lib/admin-auth'
+import { findProductDocument } from '@/lib/products-server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,9 +43,7 @@ export async function POST(req: NextRequest) {
 
     // Process each item according to returnType
     for (const item of items) {
-      const product = await Product.findOne({
-        $or: [{ id: item.productId }, { _id: item.productId }],
-      })
+      const product = await findProductDocument(item.productId)
 
       if (returnType === 'RESTOCK' || item.restockable) {
         // Restock to available sellable inventory

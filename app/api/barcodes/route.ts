@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import UnitBarcode from "@/models/UnitBarcode";
 import Product from "@/models/Product";
 import Waste from "@/models/Waste";
 import InventoryTransaction from "@/models/InventoryTransaction";
 import { verifyAdminAuth, unauthorizedResponse } from "@/lib/admin-auth";
+import { findProductDocument } from "@/lib/products-server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -97,7 +99,11 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { id, barcode, status, reason, performedBy = "Admin" } = body;
 
-    const query = id ? { _id: id } : barcode ? { barcode } : null;
+    const query = id
+      ? (mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { barcode: id })
+      : barcode
+      ? { barcode }
+      : null;
     if (!query) {
       return NextResponse.json({ error: "Barcode id or barcode text is required" }, { status: 400 });
     }
@@ -117,9 +123,7 @@ export async function PATCH(request: NextRequest) {
 
       // If it was sellable/available, decrement inventory count and record write-off
       if (previousStatus === "AVAILABLE") {
-        const product = await Product.findOne({
-          $or: [{ id: unit.productId }, { _id: unit.productId }],
-        });
+        const product = await findProductDocument(unit.productId);
 
         if (product) {
           const currentStock = typeof product.stockQuantity === "number" ? product.stockQuantity : 25;
@@ -168,9 +172,7 @@ export async function PATCH(request: NextRequest) {
       unit.status = "AVAILABLE";
       unit.reason = "";
 
-      const product = await Product.findOne({
-        $or: [{ id: unit.productId }, { _id: unit.productId }],
-      });
+      const product = await findProductDocument(unit.productId);
 
       if (product) {
         const currentStock = typeof product.stockQuantity === "number" ? product.stockQuantity : 25;
@@ -228,7 +230,11 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
     const barcode = searchParams.get("barcode");
 
-    const query = id ? { _id: id } : barcode ? { barcode } : null;
+    const query = id
+      ? (mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { barcode: id })
+      : barcode
+      ? { barcode }
+      : null;
     if (!query) {
       return NextResponse.json({ error: "Barcode id or barcode text is required" }, { status: 400 });
     }
@@ -240,9 +246,7 @@ export async function DELETE(request: NextRequest) {
 
     // If unit was sellable/AVAILABLE, decrement inventory by 1 to maintain physical alignment
     if (unit.status === "AVAILABLE") {
-      const product = await Product.findOne({
-        $or: [{ id: unit.productId }, { _id: unit.productId }],
-      });
+      const product = await findProductDocument(unit.productId);
       if (product) {
         const currentStock = typeof product.stockQuantity === "number" ? product.stockQuantity : 25;
         const nextStock = Math.max(0, currentStock - 1);

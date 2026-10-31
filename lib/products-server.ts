@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import { connectToDatabase } from '@/lib/mongodb'
 import ProductModel from '@/models/Product'
 import type { Product } from '@/lib/products-data'
@@ -5,6 +6,37 @@ import { firstCryClothingProducts } from '@/lib/firstcry-clothing-data'
 import { products as kidsProductsList } from '@/lib/products-fallback-list'
 
 const fallbackProducts: Product[] = kidsProductsList.length > 0 ? kidsProductsList : firstCryClothingProducts
+
+/**
+ * Returns a Mongoose Product document for a given id, slug, or _id,
+ * safely avoiding BSON/ObjectId CastError on custom string IDs like "fc-prod-20999215".
+ * If product exists in fallback catalog but not in MongoDB yet, it automatically persists it.
+ */
+export async function findProductDocument(idOrSlug: string) {
+  if (!idOrSlug) return null
+  await connectToDatabase()
+
+  const filter = mongoose.Types.ObjectId.isValid(idOrSlug)
+    ? { $or: [{ id: idOrSlug }, { slug: idOrSlug }, { _id: idOrSlug }] }
+    : { $or: [{ id: idOrSlug }, { slug: idOrSlug }] }
+
+  let prod = await ProductModel.findOne(filter)
+  if (!prod) {
+    const fallback = fallbackProducts.find((p) => p.id === idOrSlug || p.slug === idOrSlug)
+    if (fallback) {
+      prod = await ProductModel.findOneAndUpdate(
+        { id: fallback.id },
+        {
+          ...fallback,
+          stockQuantity: typeof fallback.stockQuantity === 'number' ? fallback.stockQuantity : 50,
+          inStock: fallback.inStock ?? true,
+        },
+        { upsert: true, new: true }
+      )
+    }
+  }
+  return prod
+}
 
 /**
  * Server-only helper to fetch a product by slug or id from MongoDB first,
