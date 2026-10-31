@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import type { InventoryTransactionItem } from '@/lib/inventory-data'
 import type { InventoryProduct, InventorySubTab } from './types'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryLedgerSubtabProps {
   transactions: InventoryTransactionItem[]
@@ -27,6 +28,8 @@ export function InventoryLedgerSubtab({
 }: InventoryLedgerSubtabProps) {
   const [ledgerTypeFilter, setLedgerTypeFilter] = useState<string>('ALL')
   const [ledgerSearch, setLedgerSearch] = useState<string>('')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(15)
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
@@ -44,6 +47,11 @@ export function InventoryLedgerSubtab({
       return true
     })
   }, [transactions, ledgerTypeFilter, ledgerSearch])
+
+  const paginatedTransactions = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return filteredTransactions.slice(start, start + pageSize)
+  }, [filteredTransactions, currentPage, pageSize])
 
   return (
     <div className="space-y-4">
@@ -112,7 +120,7 @@ export function InventoryLedgerSubtab({
                   </td>
                 </tr>
               ) : (
-                filteredTransactions.map((t) => {
+                paginatedTransactions.map((t) => {
                   let typeBadge = (
                     <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
                       {t.type}
@@ -187,6 +195,19 @@ export function InventoryLedgerSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* Ledger Table Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={filteredTransactions.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[15, 30, 50, 100]}
+        />
       </div>
     </div>
   )

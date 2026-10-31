@@ -27,6 +27,7 @@ import {
   type InventorySubTab,
   type InventoryProduct,
   type InventoryManagementTabProps,
+  InventoryTopBar,
   InventoryStatsBar,
   InventoryNavTabs,
   InventoryLedgerSubtab,
@@ -517,6 +518,15 @@ export function InventoryManagementTab({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* 0. DEDICATED INVENTORY TOP BAR (ONLY ON THIS SPECIFIC PAGE) */}
+      <InventoryTopBar
+        activeSubTab={subTab}
+        onSelectSubTab={(tab) => setSubTab(tab)}
+        onOpenScanner={() => setIsScannerModalOpen(true)}
+        totalProductsCount={products.length}
+        barcodesCount={barcodesCount}
+      />
+
       {/* 1. TOP STATS BAR */}
       <InventoryStatsBar
         totalStockUnits={totalStockUnits}

@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { Plus, ChevronRight } from 'lucide-react'
 import type { SupplierItem } from '@/lib/inventory-data'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventorySuppliersSubtabProps {
   suppliersList: SupplierItem[]
@@ -14,6 +16,13 @@ export function InventorySuppliersSubtab({
   onOpenSupplierModal,
   onIssuePOToSupplier,
 }: InventorySuppliersSubtabProps) {
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(6)
+
+  const paginatedSuppliers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return suppliersList.slice(start, start + pageSize)
+  }, [suppliersList, currentPage, pageSize])
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
@@ -34,7 +43,7 @@ export function InventorySuppliersSubtab({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {suppliersList.map((sup) => (
+        {paginatedSuppliers.map((sup) => (
           <div key={sup.supplierId} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
             <div className="flex items-start justify-between">
               <div>
@@ -84,6 +93,21 @@ export function InventorySuppliersSubtab({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Suppliers Pagination */}
+      <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={suppliersList.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[3, 6, 12, 24]}
+        />
       </div>
     </div>
   )

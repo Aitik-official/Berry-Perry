@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { Plus, Check } from 'lucide-react'
 import type { PurchaseOrderItem } from '@/lib/inventory-data'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryPurchaseOrdersSubtabProps {
   purchaseOrders: PurchaseOrderItem[]
@@ -14,6 +16,13 @@ export function InventoryPurchaseOrdersSubtab({
   onOpenCreatePOModal,
   onReceivePO,
 }: InventoryPurchaseOrdersSubtabProps) {
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+
+  const paginatedPurchaseOrders = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return purchaseOrders.slice(start, start + pageSize)
+  }, [purchaseOrders, currentPage, pageSize])
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
@@ -55,7 +64,7 @@ export function InventoryPurchaseOrdersSubtab({
                   </td>
                 </tr>
               ) : (
-                purchaseOrders.map((po) => {
+                paginatedPurchaseOrders.map((po) => {
                   const isReceived = po.status === 'RECEIVED'
                   return (
                     <tr key={po.poNumber} className="hover:bg-slate-50/70 transition">
@@ -111,6 +120,19 @@ export function InventoryPurchaseOrdersSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* PO Table Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={purchaseOrders.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+        />
       </div>
     </div>
   )

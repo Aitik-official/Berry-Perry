@@ -1,4 +1,6 @@
 export * from './types'
+export * from './InventoryTopBar'
+export * from './InventoryPagination'
 export * from './InventoryStatsBar'
 export * from './InventoryNavTabs'
 export * from './InventoryLedgerSubtab'

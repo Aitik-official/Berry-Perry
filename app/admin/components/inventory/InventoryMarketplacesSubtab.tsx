@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import {
   RefreshCw,
@@ -13,6 +13,7 @@ import {
   Package,
 } from 'lucide-react'
 import type { InventoryProduct } from './types'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryMarketplacesSubtabProps {
   products: InventoryProduct[]
@@ -26,6 +27,13 @@ export function InventoryMarketplacesSubtab({
   const [syncingAll, setSyncingAll] = useState(false)
   const [syncingSku, setSyncingSku] = useState<string | null>(null)
   const [syncStatusMap, setSyncStatusMap] = useState<Record<string, { status: string; time: string }>>({})
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return products.slice(start, start + pageSize)
+  }, [products, currentPage, pageSize])
 
   const showToast = (msg: string) => {
     if (triggerToast) triggerToast(msg)
@@ -207,7 +215,7 @@ export function InventoryMarketplacesSubtab({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {products.map((product) => {
+              {paginatedProducts.map((product) => {
                 const sku = product.sku || `VS-${product.id.slice(0, 8).toUpperCase()}`
                 const asin = `B0${product.id.slice(0, 8).toUpperCase()}`
                 const fsn = `FSN${product.id.slice(0, 9).toUpperCase()}`
@@ -288,7 +296,21 @@ export function InventoryMarketplacesSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* Marketplaces Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={products.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+        />
       </div>
     </div>
   )
 }
+

@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { RotateCcw } from 'lucide-react'
 import type { OrderReturnItem } from '@/lib/inventory-data'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryReturnsSubtabProps {
   returnsList: OrderReturnItem[]
@@ -14,6 +16,13 @@ export function InventoryReturnsSubtab({
   onOpenReturnModal,
   onRestockReturn,
 }: InventoryReturnsSubtabProps) {
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+
+  const paginatedReturnsList = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return returnsList.slice(start, start + pageSize)
+  }, [returnsList, currentPage, pageSize])
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
@@ -56,7 +65,7 @@ export function InventoryReturnsSubtab({
                   </td>
                 </tr>
               ) : (
-                returnsList.map((ret) => {
+                paginatedReturnsList.map((ret) => {
                   const isRestocked = ret.status === 'RESTOCKED'
                   return (
                     <tr key={ret.returnNumber} className="hover:bg-slate-50/70 transition">
@@ -108,6 +117,19 @@ export function InventoryReturnsSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* Returns Table Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={returnsList.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+        />
       </div>
     </div>
   )

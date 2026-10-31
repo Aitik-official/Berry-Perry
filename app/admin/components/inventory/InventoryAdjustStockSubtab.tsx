@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import {
   Package,
@@ -12,14 +12,31 @@ import {
   Scan,
   Barcode,
   Globe,
+  LayoutGrid,
+  List,
+  Zap,
+  ChevronRight,
+  Truck,
+  Plus,
 } from 'lucide-react'
 import type { InventoryProduct, InventorySubTab } from './types'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryAdjustStockSubtabProps {
   products: InventoryProduct[]
   setSubTab: (tab: InventorySubTab) => void
-  onOpenAdjustModal: (product: InventoryProduct, initialType?: 'ADJUST' | 'RECEIVE' | 'DAMAGE', qty?: number, reason?: string) => void
-  onInlineAdjust: (product: InventoryProduct, delta: number, type: 'ADJUST' | 'RECEIVE' | 'DAMAGE', reason?: string) => Promise<void>
+  onOpenAdjustModal: (
+    product: InventoryProduct,
+    initialType?: 'ADJUST' | 'RECEIVE' | 'DAMAGE',
+    qty?: number,
+    reason?: string
+  ) => void
+  onInlineAdjust: (
+    product: InventoryProduct,
+    delta: number,
+    type: 'ADJUST' | 'RECEIVE' | 'DAMAGE',
+    reason?: string
+  ) => Promise<void>
   isSubmittingInline: boolean
   onOpenPrintBarcode?: (product: InventoryProduct) => void
   onOpenScanner?: () => void
@@ -34,32 +51,50 @@ export function InventoryAdjustStockSubtab({
   onOpenPrintBarcode,
   onOpenScanner,
 }: InventoryAdjustStockSubtabProps) {
+  // View mode: 'cards' (matching original screenshot) or 'table'
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
+
+  // Search & Filters
   const [adjustSearch, setAdjustSearch] = useState<string>('')
   const [adjustCategoryFilter, setAdjustCategoryFilter] = useState<string>('all')
   const [adjustSportFilter, setAdjustSportFilter] = useState<string>('all')
   const [adjustStockStatusFilter, setAdjustStockStatusFilter] = useState<'all' | 'in_stock' | 'out_of_stock'>('all')
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(9) // 9 cards = 3x3 grid
+
+  // Inline adjustment state (for table)
   const [inlineAdjustId, setInlineAdjustId] = useState<string | null>(null)
   const [inlineDelta, setInlineDelta] = useState<number>(5)
   const [inlineType, setInlineType] = useState<'ADJUST' | 'RECEIVE' | 'DAMAGE'>('ADJUST')
   const [inlineReason, setInlineReason] = useState<string>('Quick stock update')
 
-  const filteredAdjustProducts = products.filter((p) => {
-    if (adjustSearch) {
-      const q = adjustSearch.toLowerCase()
-      const matchName = p.name.toLowerCase().includes(q)
-      const matchId = p.id.toLowerCase().includes(q)
-      const matchSku = (p.sku || '').toLowerCase().includes(q)
-      const matchCat = p.category.toLowerCase().includes(q)
-      const matchSport = p.sport.toLowerCase().includes(q)
-      if (!matchName && !matchId && !matchSku && !matchCat && !matchSport) return false
-    }
-    if (adjustCategoryFilter !== 'all' && p.category !== adjustCategoryFilter) return false
-    if (adjustSportFilter !== 'all' && p.sport !== adjustSportFilter) return false
-    if (adjustStockStatusFilter === 'in_stock' && !((p.stockQuantity ?? 25) > 0)) return false
-    if (adjustStockStatusFilter === 'out_of_stock' && ((p.stockQuantity ?? 25) > 0)) return false
-    return true
-  })
+  // Filter products
+  const filteredAdjustProducts = useMemo(() => {
+    return products.filter((p) => {
+      if (adjustSearch) {
+        const q = adjustSearch.toLowerCase()
+        const matchName = p.name.toLowerCase().includes(q)
+        const matchId = p.id.toLowerCase().includes(q)
+        const matchSku = (p.sku || '').toLowerCase().includes(q)
+        const matchCat = p.category.toLowerCase().includes(q)
+        const matchSport = p.sport.toLowerCase().includes(q)
+        if (!matchName && !matchId && !matchSku && !matchCat && !matchSport) return false
+      }
+      if (adjustCategoryFilter !== 'all' && p.category !== adjustCategoryFilter) return false
+      if (adjustSportFilter !== 'all' && p.sport !== adjustSportFilter) return false
+      if (adjustStockStatusFilter === 'in_stock' && !((p.stockQuantity ?? 25) > 0)) return false
+      if (adjustStockStatusFilter === 'out_of_stock' && ((p.stockQuantity ?? 25) > 0)) return false
+      return true
+    })
+  }, [products, adjustSearch, adjustCategoryFilter, adjustSportFilter, adjustStockStatusFilter])
+
+  // Paginated items
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return filteredAdjustProducts.slice(start, start + pageSize)
+  }, [filteredAdjustProducts, currentPage, pageSize])
 
   const totalStockUnits = products.reduce((acc, p) => acc + (p.stockQuantity ?? 25), 0)
   const inStockCount = products.filter((p) => (p.stockQuantity ?? 25) > 0).length
@@ -70,61 +105,191 @@ export function InventoryAdjustStockSubtab({
     setInlineAdjustId(null)
   }
 
+  const handleResetFilters = () => {
+    setAdjustSearch('')
+    setAdjustCategoryFilter('all')
+    setAdjustSportFilter('all')
+    setAdjustStockStatusFilter('all')
+    setCurrentPage(1)
+  }
+
   return (
-    <div className="space-y-4">
-      {/* Top Header Metrics Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-            Total Catalog Items
-          </span>
-          <p className="mt-1 text-xl sm:text-2xl font-black text-[#080d2d]">{products.length}</p>
-          <span className="text-[10px] text-slate-400">Tracked for Adjustment</span>
+    <div className="space-y-4 sm:space-y-5">
+      {/* 1. TOP HEADER & HIERARCHY BANNER (MATCHING SCREENSHOT) */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#080d2d] text-white shadow-md shadow-[#080d2d]/20 shrink-0">
+              <Package className="h-6 w-6 text-pink-400" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#080d2d]">
+                Products &amp; Warehouse Hierarchy
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Manage master catalog products, physical stock levels, SKUs, and per-unit serial barcodes.
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons on right */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800">
+              <Globe className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Website Listed ({products.length})</span>
+              <span className="rounded bg-emerald-200/60 px-1.5 py-0.2 text-[10px] font-black text-emerald-900">
+                {inStockCount} in stock
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (products.length > 0) {
+                  onOpenAdjustModal(products[0], 'RECEIVE', 10, 'Bulk replenishment intake')
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#5CB946] hover:bg-emerald-600 px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-sm transition active:scale-95"
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span>Bulk Refill</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSubTab('po')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 transition active:scale-95 shadow-2xs"
+            >
+              <Truck className="h-3.5 w-3.5 text-slate-500" />
+              <span>Create PO</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (products.length > 0) {
+                  onOpenAdjustModal(products[0], 'ADJUST', 10, 'Physical cycle-count audit')
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#080d2d] hover:bg-slate-800 px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-sm transition active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5 text-[#EB008B]" />
+              <span>Adjust Stock</span>
+            </button>
+          </div>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-            Total Units On Hand
-          </span>
-          <p className="mt-1 text-xl sm:text-2xl font-black text-blue-600 font-mono">{totalStockUnits}</p>
-          <span className="text-[10px] text-slate-400">Warehouse Inventory</span>
+
+        {/* 2. SUB-NAVIGATION PILLS (MATCHING SCREENSHOT) */}
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+          <button
+            type="button"
+            onClick={() => {
+              setViewMode('cards')
+              setPageSize(9)
+              setCurrentPage(1)
+            }}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition ${
+              viewMode === 'cards'
+                ? 'bg-[#080d2d] text-white shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5 text-pink-400" />
+            <span>Product Cards ({filteredAdjustProducts.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setViewMode('table')
+              setPageSize(10)
+              setCurrentPage(1)
+            }}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wider transition ${
+              viewMode === 'table'
+                ? 'bg-[#080d2d] text-white shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <List className="h-3.5 w-3.5 text-blue-400" />
+            <span>Data Table ({filteredAdjustProducts.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab('barcodes')}
+            className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+          >
+            <Barcode className="h-3.5 w-3.5 text-indigo-500" />
+            <span>Unit Barcodes</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab('ledger')}
+            className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+          >
+            <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
+            <span>Stock Ledger</span>
+          </button>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-            In Stock SKUs
-          </span>
-          <p className="mt-1 text-xl sm:text-2xl font-black text-emerald-600">{inStockCount}</p>
-          <span className="text-[10px] text-slate-400">Active Available</span>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-            Out Of Stock
-          </span>
-          <p className="mt-1 text-xl sm:text-2xl font-black text-rose-600">{outOfStockCount}</p>
-          <span className="text-[10px] text-slate-400">Requires Replenishment</span>
+
+        {/* 3. STOREFRONT STATUS NOTIFICATION BANNER (MATCHING SCREENSHOT) */}
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-blue-200/80 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 p-3.5 text-xs text-slate-700">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-2xs shrink-0">
+              <Globe className="h-4 w-4" />
+            </span>
+            <div>
+              <span className="font-bold text-[#080d2d]">Storefront Status:</span>{' '}
+              <span className="font-semibold text-slate-600">
+                {products.length} Products Visible • {inStockCount} Ready to Ship •{' '}
+                <span className="text-rose-600 font-bold">{outOfStockCount} Out of Stock</span>
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setViewMode(viewMode === 'cards' ? 'table' : 'cards')
+              setCurrentPage(1)
+            }}
+            className="inline-flex items-center gap-1 font-bold text-blue-700 hover:text-blue-900 transition self-start sm:self-auto shrink-0"
+          >
+            <span>{viewMode === 'cards' ? 'Switch to Data Table' : 'Switch to Product Cards'}</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+      {/* 4. SEARCH & FILTER BAR */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-sm">
         <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search products by title, SKU, category, or sport to adjust..."
+              placeholder="Search products by title, SKU, brand, category, or sport..."
               value={adjustSearch}
-              onChange={(e) => setAdjustSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-4 text-xs font-medium text-[#080d2d] outline-none transition focus:border-[#EB008B] focus:bg-white"
+              onChange={(e) => {
+                setAdjustSearch(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-xs font-medium text-[#080d2d] outline-none transition focus:border-[#EB008B] focus:bg-white"
             />
           </div>
 
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
             <select
               value={adjustCategoryFilter}
-              onChange={(e) => setAdjustCategoryFilter(e.target.value)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
+              onChange={(e) => {
+                setAdjustCategoryFilter(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
             >
-              <option value="all">Category: All</option>
+              <option value="all">Website: All Categories ({products.length})</option>
               {Array.from(new Set(products.map((p) => p.category))).map((cat) => (
                 <option key={cat} value={cat}>
                   {cat.replace(/-/g, ' ')}
@@ -133,38 +298,23 @@ export function InventoryAdjustStockSubtab({
             </select>
 
             <select
-              value={adjustSportFilter}
-              onChange={(e) => setAdjustSportFilter(e.target.value)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
-            >
-              <option value="all">Sport: All</option>
-              {Array.from(new Set(products.map((p) => p.sport))).map((sport) => (
-                <option key={sport} value={sport}>
-                  {sport.toUpperCase()}
-                </option>
-              ))}
-            </select>
-
-            <select
               value={adjustStockStatusFilter}
-              onChange={(e) => setAdjustStockStatusFilter(e.target.value as any)}
-              className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
+              onChange={(e) => {
+                setAdjustStockStatusFilter(e.target.value as any)
+                setCurrentPage(1)
+              }}
+              className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-[#080d2d] outline-none focus:border-[#EB008B]"
             >
-              <option value="all">Stock: All</option>
-              <option value="in_stock">In Stock Only</option>
-              <option value="out_of_stock">Out of Stock Only</option>
+              <option value="all">Stock: All Statuses</option>
+              <option value="in_stock">In Stock Only ({inStockCount})</option>
+              <option value="out_of_stock">Out of Stock Only ({outOfStockCount})</option>
             </select>
 
             <button
               type="button"
-              onClick={() => {
-                setAdjustSearch('')
-                setAdjustCategoryFilter('all')
-                setAdjustSportFilter('all')
-                setAdjustStockStatusFilter('all')
-              }}
+              onClick={handleResetFilters}
               title="Reset filters"
-              className="flex items-center justify-center rounded-lg border border-slate-300 p-2 text-slate-600 hover:bg-slate-100 transition shrink-0"
+              className="flex items-center justify-center rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 transition shrink-0"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -174,148 +324,138 @@ export function InventoryAdjustStockSubtab({
               onClick={() => {
                 if (onOpenScanner) onOpenScanner()
               }}
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition shrink-0 shadow-xs"
+              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-700 transition shrink-0 shadow-xs"
               title="Open Barcode Scanner (Inbound & Outbound)"
             >
               <Scan className="h-3.5 w-3.5" />
               <span>Scan Barcode</span>
             </button>
-
-            <button
-              type="button"
-              onClick={() => setSubTab('barcodes')}
-              className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-900 hover:bg-indigo-100 transition shrink-0 shadow-xs"
-              title="View and generate serialized unit barcodes"
-            >
-              <Barcode className="h-3.5 w-3.5 text-indigo-600" />
-              <span>Serials</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSubTab('marketplaces')}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 transition shrink-0 shadow-xs"
-              title="Open Amazon & Flipkart sync hub"
-            >
-              <Globe className="h-3.5 w-3.5 text-amber-600" />
-              <span>Marketplaces</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSubTab('ledger')}
-              className="flex items-center gap-1.5 rounded-lg bg-[#080d2d] px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-800 transition shrink-0"
-            >
-              <ClipboardList className="h-3.5 w-3.5 text-blue-400" />
-              <span>View Ledger</span>
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Product Stock Adjustment Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 sm:px-6 py-3.5 sm:py-4">
-          <h2 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#080d2d]">
-            Stock Adjustment Catalog
-            <span className="ml-2 font-bold text-[#EB008B]">({filteredAdjustProducts.length})</span>
-          </h2>
-          <span className="text-[11px] text-slate-400 hidden sm:inline">
-            Adjust counts directly or click Adjust for full cycle-count audit
-          </span>
-        </div>
-
-        {/* MOBILE CARDS VIEW */}
-        <div className="block md:hidden divide-y divide-slate-100">
-          {filteredAdjustProducts.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 font-medium text-xs">
-              No products found matching your search.
+      {/* 5. VIEW A: PRODUCT CARDS VIEW (SIGNATURE DARK CARDS MATCHING SCREENSHOT) */}
+      {viewMode === 'cards' && (
+        <div className="space-y-4">
+          {paginatedProducts.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-400">
+              <Package className="mx-auto h-10 w-10 text-slate-300" />
+              <p className="mt-3 font-bold text-slate-700">No matching products found</p>
+              <p className="text-xs text-slate-400 mt-1">Try clearing your search or category filters.</p>
             </div>
           ) : (
-            filteredAdjustProducts.map((product) => {
-              const currentStock = product.stockQuantity ?? 25
-              const isInlineOpen = inlineAdjustId === product.id
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+              {paginatedProducts.map((product) => {
+                const currentStock = product.stockQuantity ?? 25
+                const skuCode = product.sku || `BP-${product.id.slice(0, 8).toUpperCase()}`
+                const barcodeTag = `BP-BAR-${product.id.slice(0, 10).toUpperCase()}`
 
-              return (
-                <div key={product.id} className="p-3.5 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center">
-                      {product.image ? (
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                          sizes="56px"
-                          unoptimized
-                        />
-                      ) : (
-                        <Package className="h-6 w-6 text-slate-300" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-bold text-xs text-[#080d2d] line-clamp-2">
-                        {product.name}
-                      </div>
-                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                        SKU: {product.sku || `VS-${product.id.slice(0, 8).toUpperCase()}`}
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                        {product.mainCategory && (
-                          <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
-                            {product.mainCategory}
-                          </span>
-                        )}
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold capitalize text-slate-700">
-                          {product.category.replace(/-/g, ' ')}
-                        </span>
-                        <span className="text-[10px] uppercase font-bold text-slate-400">
-                          {product.sport}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between border-t border-slate-100 pt-2.5">
+                return (
+                  <div
+                    key={product.id}
+                    className="rounded-2xl border border-slate-800 bg-[#080d2d] text-white p-5 shadow-lg flex flex-col justify-between hover:border-slate-600 transition duration-200"
+                  >
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400">Current Stock</span>
-                      <div className="font-black text-sm text-[#080d2d] font-mono">
-                        {currentStock} units
+                      {/* Top Header: Category & Name */}
+                      <div className="flex items-start gap-3.5">
+                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-slate-700 bg-slate-800/80 flex items-center justify-center">
+                          {product.image ? (
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                              sizes="56px"
+                              unoptimized
+                            />
+                          ) : (
+                            <Package className="h-6 w-6 text-slate-400" />
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <span className="inline-block rounded bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-pink-300 border border-white/15 mb-1">
+                            {product.mainCategory || product.category.replace(/-/g, ' ')}
+                          </span>
+                          <h4 className="font-black text-xs sm:text-sm uppercase tracking-tight text-white line-clamp-2">
+                            {product.name}
+                          </h4>
+                        </div>
+                      </div>
+
+                      {/* Website Status Row */}
+                      <div className="mt-3.5 flex items-center justify-between border-t border-slate-800/80 pt-2.5 text-xs text-slate-300">
+                        <span className="text-[11px] text-slate-400">Website:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Live
+                          </span>
+                          <span
+                            className={`rounded px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${
+                              currentStock > 0
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            }`}
+                          >
+                            {currentStock > 0 ? `${currentStock} In Stock` : 'Out of Stock'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 2-Column Metrics Box (Matching Screenshot) */}
+                      <div className="mt-3.5 grid grid-cols-2 gap-2.5 rounded-xl bg-slate-900/90 border border-slate-800 p-3">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            Offer Price
+                          </span>
+                          <p className="mt-0.5 text-base sm:text-lg font-black text-white font-mono">
+                            ₹{product.price}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            In Stock
+                          </span>
+                          <p className="mt-0.5 text-base sm:text-lg font-black text-emerald-400 font-mono">
+                            {currentStock} <span className="text-xs font-normal text-slate-300">Units</span>
+                          </p>
+                          <span className="text-[9px] text-slate-400 block font-medium">Per-Unit Serialized</span>
+                        </div>
+                      </div>
+
+                      {/* SKU & Barcode Tag */}
+                      <div className="mt-3.5 space-y-1 text-[11px] font-mono text-slate-400">
+                        <div className="flex justify-between">
+                          <span>SKU Code:</span>
+                          <span className="font-bold text-slate-200">{skuCode}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Barcode Tag:</span>
+                          <span className="font-bold text-slate-300 truncate max-w-[140px]">{barcodeTag}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
-                          currentStock > 0
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
-                        }`}
-                      >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            currentStock > 0 ? 'bg-emerald-600' : 'bg-rose-600'
-                          }`}
-                        />
-                        {currentStock > 0 ? 'In Stock' : 'Out'}
-                      </span>
-
+                    {/* Card Action Footer (Matching Screenshot) */}
+                    <div className="mt-4 flex items-center gap-2 border-t border-slate-800 pt-3">
                       <button
                         type="button"
-                        onClick={() => setSubTab('barcodes')}
-                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition"
-                        title={`View Unit Barcodes: ${product.name}`}
+                        onClick={() => onOpenAdjustModal(product, 'RECEIVE', 10, 'Stock refill addition')}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#5CB946] hover:bg-emerald-600 px-3 py-2 text-xs font-black uppercase tracking-wider text-white transition active:scale-95 shadow-sm"
                       >
-                        <Barcode className="h-3.5 w-3.5" />
+                        <Zap className="h-3.5 w-3.5" />
+                        <span>Refill (+10)</span>
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => setSubTab('marketplaces')}
-                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-amber-600 transition"
-                        title={`Amazon / Flipkart Sync: ${product.name}`}
+                        onClick={() => onOpenAdjustModal(product, 'ADJUST', 10, 'Physical cycle-count audit')}
+                        className="flex items-center gap-1 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-2 text-xs font-bold text-white transition"
+                        title="View details & audit"
                       >
-                        <Globe className="h-3.5 w-3.5" />
+                        <span>Details</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
                       </button>
 
                       <button
@@ -323,300 +463,278 @@ export function InventoryAdjustStockSubtab({
                         onClick={() => {
                           if (onOpenPrintBarcode) onOpenPrintBarcode(product)
                         }}
-                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-[#EB008B] hover:border-slate-300 transition"
-                        title={`Print Barcode: ${product.name}`}
+                        className="rounded-xl border border-slate-700 bg-white/5 p-2 text-slate-400 hover:text-white hover:bg-white/10 transition"
+                        title="Print Barcode Thermal Label"
                       >
                         <Printer className="h-3.5 w-3.5" />
                       </button>
-
-                      <button
-                        type="button"
-                        onClick={() => onOpenAdjustModal(product, 'ADJUST', 10, 'Physical cycle-count audit')}
-                        className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-blue-600 hover:border-slate-300 transition"
-                        title={`Adjust Stock: ${product.name}`}
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
                     </div>
                   </div>
-
-                  {/* Inline adjustment form on mobile */}
-                  {isInlineOpen && (
-                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-2.5 space-y-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={inlineType}
-                          onChange={(e) => setInlineType(e.target.value as any)}
-                          className="rounded border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-[#080d2d]"
-                        >
-                          <option value="ADJUST">Reconcile (+/-)</option>
-                          <option value="RECEIVE">Intake (+)</option>
-                          <option value="DAMAGE">Scrap (-)</option>
-                        </select>
-                        <input
-                          type="number"
-                          value={inlineDelta}
-                          onChange={(e) => setInlineDelta(Number(e.target.value))}
-                          className="w-20 rounded border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-[#080d2d]"
-                        />
-                      </div>
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setInlineAdjustId(null)}
-                          className="rounded px-2.5 py-1 font-bold text-slate-500 hover:bg-slate-200"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isSubmittingInline}
-                          onClick={() => handleApplyInline(product)}
-                          className="rounded bg-[#080d2d] px-3 py-1 font-bold text-white disabled:opacity-50"
-                        >
-                          {isSubmittingInline ? 'Saving...' : 'Apply'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })
+                )
+              })}
+            </div>
           )}
-        </div>
 
-        {/* DESKTOP TABLE VIEW */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-wider text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Product</th>
-                <th className="px-4 py-3">Category &amp; Sport</th>
-                <th className="px-4 py-3">Price</th>
-                <th className="px-4 py-3 text-center">Stock Level</th>
-                <th className="px-4 py-3 text-center">Quick Adjust</th>
-                <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-[#080d2d]">
-              {filteredAdjustProducts.length === 0 ? (
+          {/* Cards View Pagination */}
+          <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <InventoryPagination
+              currentPage={currentPage}
+              totalItems={filteredAdjustProducts.length}
+              pageSize={pageSize}
+              onPageChange={(page) => setCurrentPage(page)}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize)
+                setCurrentPage(1)
+              }}
+              pageSizeOptions={[6, 9, 18, 36]}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 5. VIEW B: DATA TABLE VIEW */}
+      {viewMode === 'table' && (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 sm:px-6 py-3.5 sm:py-4">
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#080d2d]">
+              Stock Adjustment Table
+              <span className="ml-2 font-bold text-[#EB008B]">({filteredAdjustProducts.length})</span>
+            </h3>
+            <span className="text-[11px] text-slate-400 hidden sm:inline">
+              Showing page {currentPage} of {Math.max(1, Math.ceil(filteredAdjustProducts.length / pageSize))}
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-wider text-slate-500">
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
-                    No products found matching your search.
-                  </td>
+                  <th className="px-4 py-3">Product</th>
+                  <th className="px-4 py-3">Category &amp; Sport</th>
+                  <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3 text-center">Stock Level</th>
+                  <th className="px-4 py-3 text-center">Quick Adjust</th>
+                  <th className="px-4 py-3 text-center">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredAdjustProducts.map((product) => {
-                  const currentStock = product.stockQuantity ?? 25
-                  const isInlineOpen = inlineAdjustId === product.id
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-[#080d2d]">
+                {paginatedProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
+                      No products found matching your search.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedProducts.map((product) => {
+                    const currentStock = product.stockQuantity ?? 25
+                    const isInlineOpen = inlineAdjustId === product.id
 
-                  return (
-                    <tr key={product.id} className="transition-colors hover:bg-slate-50/80">
-                      {/* Product column with image and SKU */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center">
-                            {product.image ? (
-                              <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                                sizes="48px"
-                                unoptimized
-                              />
-                            ) : (
-                              <Package className="h-5 w-5 text-slate-300" />
+                    return (
+                      <tr key={product.id} className="transition-colors hover:bg-slate-50/80">
+                        {/* Product column */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center">
+                              {product.image ? (
+                                <Image
+                                  src={product.image}
+                                  alt={product.name}
+                                  fill
+                                  className="object-cover"
+                                  sizes="48px"
+                                  unoptimized
+                                />
+                              ) : (
+                                <Package className="h-5 w-5 text-slate-300" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-bold text-[#080d2d] line-clamp-1">{product.name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                SKU: {product.sku || `BP-${product.id.slice(0, 8).toUpperCase()}`}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Category & Sport */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {product.mainCategory && (
+                              <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
+                                {product.mainCategory}
+                              </span>
                             )}
-                          </div>
-                          <div>
-                            <div className="font-bold text-[#080d2d] line-clamp-1">
-                              {product.name}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                              SKU: {product.sku || `VS-${product.id.slice(0, 8).toUpperCase()}`}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Category & Sport */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {product.mainCategory && (
-                            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
-                              {product.mainCategory}
+                            <span className="font-bold capitalize text-slate-800 text-xs">
+                              {product.category.replace(/-/g, ' ')}
                             </span>
-                          )}
-                          <span className="font-bold capitalize text-slate-800 text-xs">
-                            {product.category.replace(/-/g, ' ')}
+                          </div>
+                          <div className="text-[10px] uppercase font-bold text-slate-400 mt-0.5">
+                            {product.sport}
+                          </div>
+                        </td>
+
+                        {/* Price */}
+                        <td className="px-4 py-3">
+                          <div className="font-black text-[#080d2d]">₹{product.price}</div>
+                        </td>
+
+                        {/* Current Stock */}
+                        <td className="px-4 py-3 text-center">
+                          <span className="font-mono text-sm font-black text-[#080d2d] bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {currentStock}
                           </span>
-                        </div>
-                        <div className="text-[10px] uppercase font-bold text-slate-400 mt-0.5">
-                          {product.sport}
-                        </div>
-                      </td>
+                          <div className="text-[10px] text-slate-400 mt-1 font-medium">units</div>
+                        </td>
 
-                      {/* Price */}
-                      <td className="px-4 py-3">
-                        <div className="font-black text-[#080d2d]">₹{product.price}</div>
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <div className="text-[10px] text-slate-400 line-through">
-                            ₹{product.originalPrice}
-                          </div>
-                        )}
-                      </td>
+                        {/* Quick Inline Increment / Decrement */}
+                        <td className="px-4 py-3">
+                          {isInlineOpen ? (
+                            <div className="flex items-center justify-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                              <select
+                                value={inlineType}
+                                onChange={(e) => setInlineType(e.target.value as any)}
+                                className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] font-bold text-[#080d2d]"
+                              >
+                                <option value="ADJUST">Reconcile (+/-)</option>
+                                <option value="RECEIVE">Intake (+)</option>
+                                <option value="DAMAGE">Scrap (-)</option>
+                              </select>
+                              <input
+                                type="number"
+                                value={inlineDelta}
+                                onChange={(e) => setInlineDelta(Number(e.target.value))}
+                                className="w-16 rounded border border-slate-300 bg-white px-1.5 py-1 text-xs font-bold text-[#080d2d]"
+                              />
+                              <button
+                                type="button"
+                                disabled={isSubmittingInline}
+                                onClick={() => handleApplyInline(product)}
+                                className="rounded bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                              >
+                                {isSubmittingInline ? '...' : 'Save'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setInlineAdjustId(null)}
+                                className="rounded border border-slate-300 px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onOpenAdjustModal(product, 'DAMAGE', 1, 'Discrepancy deduction')
+                                }}
+                                title="Deduct 1 unit"
+                                className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-rose-600 hover:bg-rose-50 transition"
+                              >
+                                -1
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onOpenAdjustModal(product, 'RECEIVE', 10, 'Quick intake addition')
+                                }}
+                                title="Add 10 units"
+                                className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-50 transition"
+                              >
+                                +10
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setInlineAdjustId(product.id)
+                                  setInlineDelta(5)
+                                  setInlineType('ADJUST')
+                                  setInlineReason('Quick stock update')
+                                }}
+                                title="Custom inline edit"
+                                className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-100 transition"
+                              >
+                                Custom
+                              </button>
+                            </div>
+                          )}
+                        </td>
 
-                      {/* Current Stock Count */}
-                      <td className="px-4 py-3 text-center">
-                        <span className="font-mono text-sm font-black text-[#080d2d] bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                          {currentStock}
-                        </span>
-                        <div className="text-[10px] text-slate-400 mt-1 font-medium">units</div>
-                      </td>
-
-                      {/* Quick Inline Increment / Decrement */}
-                      <td className="px-4 py-3">
-                        {isInlineOpen ? (
-                          <div className="flex items-center justify-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <select
-                              value={inlineType}
-                              onChange={(e) => setInlineType(e.target.value as any)}
-                              className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] font-bold text-[#080d2d]"
-                            >
-                              <option value="ADJUST">Reconcile (+/-)</option>
-                              <option value="RECEIVE">Intake (+)</option>
-                              <option value="DAMAGE">Scrap (-)</option>
-                            </select>
-                            <input
-                              type="number"
-                              value={inlineDelta}
-                              onChange={(e) => setInlineDelta(Number(e.target.value))}
-                              className="w-16 rounded border border-slate-300 bg-white px-1.5 py-1 text-xs font-bold text-[#080d2d]"
-                            />
-                            <button
-                              type="button"
-                              disabled={isSubmittingInline}
-                              onClick={() => handleApplyInline(product)}
-                              className="rounded bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                              {isSubmittingInline ? '...' : 'Save'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setInlineAdjustId(null)}
-                              className="rounded border border-slate-300 px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-100"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onOpenAdjustModal(product, 'DAMAGE', 1, 'Physical discrepancy deduction')
-                              }}
-                              title="Deduct 1 unit"
-                              className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-rose-600 hover:bg-rose-50 hover:border-rose-300 transition"
-                            >
-                              -1
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                onOpenAdjustModal(product, 'RECEIVE', 10, 'Quick intake addition')
-                              }}
-                              title="Add 10 units"
-                              className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 transition"
-                            >
-                              +10
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setInlineAdjustId(product.id)
-                                setInlineDelta(5)
-                                setInlineType('ADJUST')
-                                setInlineReason('Quick stock update')
-                              }}
-                              title="Quick inline edit"
-                              className="rounded border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-100 transition"
-                            >
-                              Custom
-                            </button>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Status Badge */}
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
-                            currentStock > 0
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}
-                        >
+                        {/* Status */}
+                        <td className="px-4 py-3 text-center">
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              currentStock > 0 ? 'bg-emerald-600' : 'bg-rose-600'
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+                              currentStock > 0
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
                             }`}
-                          />
-                          {currentStock > 0 ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </td>
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                currentStock > 0 ? 'bg-emerald-600' : 'bg-rose-600'
+                              }`}
+                            />
+                            {currentStock > 0 ? 'In Stock' : 'Out of Stock'}
+                          </span>
+                        </td>
 
-                      {/* Actions column */}
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setSubTab('barcodes')}
-                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 hover:border-slate-300 transition shadow-xs"
-                            title={`Serialized Unit Barcodes: ${product.name}`}
-                          >
-                            <Barcode className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSubTab('marketplaces')}
-                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-amber-600 hover:border-slate-300 transition shadow-xs"
-                            title={`Amazon / Flipkart Stock Feed: ${product.name}`}
-                          >
-                            <Globe className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onOpenPrintBarcode) onOpenPrintBarcode(product)
-                            }}
-                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-[#EB008B] hover:border-slate-300 transition shadow-xs"
-                            title={`Print Thermal Barcode: ${product.name}`}
-                          >
-                            <Printer className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onOpenAdjustModal(product, 'ADJUST', 10, 'Physical cycle-count audit')
-                            }}
-                            className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-blue-600 hover:border-slate-300 transition shadow-xs"
-                            title={`Adjust Stock: ${product.name}`}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
+                        {/* Actions */}
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSubTab('barcodes')}
+                              className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 transition shadow-xs"
+                              title={`Serialized Barcodes: ${product.name}`}
+                            >
+                              <Barcode className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onOpenPrintBarcode) onOpenPrintBarcode(product)
+                              }}
+                              className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-[#EB008B] transition shadow-xs"
+                              title={`Print Thermal Barcode: ${product.name}`}
+                            >
+                              <Printer className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onOpenAdjustModal(product, 'ADJUST', 10, 'Physical cycle-count audit')
+                              }}
+                              className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 hover:text-blue-600 transition shadow-xs"
+                              title={`Adjust Stock: ${product.name}`}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Table View Pagination */}
+          <InventoryPagination
+            currentPage={currentPage}
+            totalItems={filteredAdjustProducts.length}
+            pageSize={pageSize}
+            onPageChange={(page) => setCurrentPage(page)}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize)
+              setCurrentPage(1)
+            }}
+            pageSizeOptions={[10, 25, 50, 100]}
+          />
         </div>
-      </div>
+      )}
     </div>
   )
 }

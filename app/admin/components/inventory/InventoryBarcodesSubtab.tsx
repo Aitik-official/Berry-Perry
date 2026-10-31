@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Barcode,
   Search,
@@ -18,6 +18,7 @@ import {
 import { generateBarcodeSvg } from '@/lib/barcode'
 import { getSessionCache, setSessionCache } from '@/lib/sessionCache'
 import type { InventoryProduct } from './types'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface UnitBarcodeItem {
   _id: string
@@ -50,6 +51,8 @@ export function InventoryBarcodesSubtab({
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(15)
   const [stats, setStats] = useState({
     TOTAL: 0,
     AVAILABLE: 0,
@@ -58,6 +61,11 @@ export function InventoryBarcodesSubtab({
     DAMAGED: 0,
     RETIRED: 0,
   })
+
+  const paginatedBarcodes = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return barcodes.slice(start, start + pageSize)
+  }, [barcodes, currentPage, pageSize])
 
   // Modals state
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false)
@@ -376,7 +384,7 @@ export function InventoryBarcodesSubtab({
                   </td>
                 </tr>
               ) : (
-                barcodes.map((unit) => (
+                paginatedBarcodes.map((unit) => (
                   <tr key={unit._id} className="hover:bg-slate-50/80 transition">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
@@ -469,6 +477,19 @@ export function InventoryBarcodesSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* Barcodes Table Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={barcodes.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[15, 30, 50, 100]}
+        />
       </div>
 
       {/* ============================================================ */}

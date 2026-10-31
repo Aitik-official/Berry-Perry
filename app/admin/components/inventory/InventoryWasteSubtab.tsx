@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import type { DamageWasteItem } from '@/lib/inventory-data'
+import { InventoryPagination } from './InventoryPagination'
 
 export interface InventoryWasteSubtabProps {
   wasteLogs: DamageWasteItem[]
@@ -12,6 +14,13 @@ export function InventoryWasteSubtab({
   wasteLogs,
   onOpenWasteModal,
 }: InventoryWasteSubtabProps) {
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
+
+  const paginatedWasteLogs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return wasteLogs.slice(start, start + pageSize)
+  }, [wasteLogs, currentPage, pageSize])
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
@@ -55,7 +64,7 @@ export function InventoryWasteSubtab({
                   </td>
                 </tr>
               ) : (
-                wasteLogs.map((w) => (
+                paginatedWasteLogs.map((w) => (
                   <tr key={w.wasteId} className="hover:bg-slate-50/70 transition">
                     <td className="px-4 py-3 font-mono font-bold text-slate-700">{w.wasteId}</td>
                     <td className="px-4 py-3">
@@ -80,6 +89,19 @@ export function InventoryWasteSubtab({
             </tbody>
           </table>
         </div>
+
+        {/* Waste Table Pagination */}
+        <InventoryPagination
+          currentPage={currentPage}
+          totalItems={wasteLogs.length}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize)
+            setCurrentPage(1)
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+        />
       </div>
     </div>
   )
